@@ -1,6 +1,6 @@
-package org.jetbrains.plugins.template.services
+package com.github.hamoid.ideathumbnails.services
 
-import org.jetbrains.plugins.template.MyBundle
+import com.github.hamoid.ideathumbnails.MyBundle
 
 class MyApplicationService {
 
