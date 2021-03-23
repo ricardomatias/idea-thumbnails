@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.hamoid.ideathumbnails</id>
-    <name>idea-thumbnails</name>
-    <vendor>hamoid</vendor>
+    <name>Thumbnailer</name>
+    <vendor>aBe</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
