@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.github.hamoid.ideathumbnails</id>
+    <id>com.androhi.androiddrawableviewer</id>
     <name>Thumbnailer</name>
     <vendor>aBe</vendor>
 
@@ -8,12 +8,17 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.hamoid.ideathumbnails.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.hamoid.ideathumbnails.services.MyProjectService"/>
+        <toolWindow anchor="right" canCloseContents="true" 
+                    id="Thumbnailer" 
+                    secondary="true"
+                    icon="AllIcons.General.Modified"
+                    factoryClass="com.androhi.androiddrawableviewer.form.AndroidDrawableViewerToolWindowFactory" />
+        <projectService serviceInterface="com.androhi.androiddrawableviewer.PluginConfig"
+                        serviceImplementation="com.androhi.androiddrawableviewer.PluginConfig" />
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.hamoid.ideathumbnails.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
+    <actions>
+        <action class="com.androhi.androiddrawableviewer.action.EditTargetResDirAction" id="EditTargetResDir" />
+    </actions>
+
 </idea-plugin>
