@@ -40,5 +40,15 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
 
-Abe: see ImagesProjectViewPane.java
-https://github.com/JetBrains/intellij-sdk-code-samples/tree/main/project_view_pane/src/main/java/org/intellij/sdk/view/pane
+# Thumbnails
+
+- [ ] Scan .kt files that contain `fun main()` and application
+- [ ] From those files, try to read header comment which includes hashId, description, date
+- [ ] If hashId missing, create it, set date, description placeholder.
+- [ ] Make it possible to click on image (enlarge) and name (open file to edit)
+- [ ] Decide folder name for images
+- [ ] Allow drag & drop image to image placeholder to set it.
+- [ ] For programs without hash show image placeholder. Clicking on it opens file to edit.
+- [ ] Decide how to save screenshot
+- [ ] Add filter box at the top of the plugin window.
+- [ ] Nice to have: allow multiple screenshots per program.
