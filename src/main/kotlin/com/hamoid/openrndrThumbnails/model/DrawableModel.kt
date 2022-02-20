@@ -1,6 +1,6 @@
-package com.androhi.androiddrawableviewer.model
+package com.hamoid.openrndrThumbnails.model
 
-import com.androhi.androiddrawableviewer.Constants.Companion.PATH_SEPARATOR
+import com.hamoid.openrndrThumbnails.Constants.Companion.PATH_SEPARATOR
 import java.io.File
 
 /**

@@ -1,10 +1,10 @@
-package com.androhi.androiddrawableviewer.form
+package com.hamoid.openrndrThumbnails.form
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 
-class AndroidDrawableViewerToolWindowFactory : ToolWindowFactory {
+class OpenrndrThumbnailToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val drawableViewer = DrawableViewer(project)

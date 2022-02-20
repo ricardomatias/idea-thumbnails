@@ -1,7 +1,7 @@
-package com.androhi.androiddrawableviewer.form
+package com.hamoid.openrndrThumbnails.form
 
-import com.androhi.androiddrawableviewer.Constants
-import com.androhi.androiddrawableviewer.PluginConfig
+import com.hamoid.openrndrThumbnails.Constants
+import com.hamoid.openrndrThumbnails.PluginConfig
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
@@ -10,8 +10,6 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import javax.swing.JCheckBox
-import javax.swing.JComponent
 import javax.swing.JPanel
 
 class SettingsDialog(private val project: Project?) : DialogWrapper(project, true) {

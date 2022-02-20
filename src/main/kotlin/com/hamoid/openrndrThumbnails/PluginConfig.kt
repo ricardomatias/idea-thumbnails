@@ -1,15 +1,15 @@
-package com.androhi.androiddrawableviewer
+package com.hamoid.openrndrThumbnails
 
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 @State(
-        name = "AndroidDrawableViewer",
+        name = "OPENRDRThumbnails",
         reloadable = true,
         storages = [
-            Storage(file = "\$PROJECT_FILE\$"),
-            Storage(file = "\$PROJECT_CONFIG_DIR\$/drawable_viewer_plugin.xml")
+            Storage("\$PROJECT_FILE\$"),
+            Storage("\$PROJECT_CONFIG_DIR\$/openrndr_thumbnails_plugin.xml")
         ]
 )
 

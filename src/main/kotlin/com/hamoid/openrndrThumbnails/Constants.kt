@@ -1,4 +1,4 @@
-package com.androhi.androiddrawableviewer
+package com.hamoid.openrndrThumbnails
 
 class Constants {
     companion object {

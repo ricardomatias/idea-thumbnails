@@ -1,6 +1,6 @@
-package com.androhi.androiddrawableviewer.action
+package com.hamoid.openrndrThumbnails.action
 
-import com.androhi.androiddrawableviewer.form.SettingsDialog
+import com.hamoid.openrndrThumbnails.form.SettingsDialog
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

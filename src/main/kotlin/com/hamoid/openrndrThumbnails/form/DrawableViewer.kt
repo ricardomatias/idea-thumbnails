@@ -1,10 +1,10 @@
-package com.androhi.androiddrawableviewer.form
+package com.hamoid.openrndrThumbnails.form
 
-import com.androhi.androiddrawableviewer.Constants
-import com.androhi.androiddrawableviewer.PluginConfig
-import com.androhi.androiddrawableviewer.action.EditTargetResDirAction
-import com.androhi.androiddrawableviewer.model.DrawableModel
-import com.androhi.androiddrawableviewer.utils.IconUtils
+import com.hamoid.openrndrThumbnails.Constants
+import com.hamoid.openrndrThumbnails.PluginConfig
+import com.hamoid.openrndrThumbnails.action.EditTargetResDirAction
+import com.hamoid.openrndrThumbnails.model.DrawableModel
+import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.ide.CopyPasteManager
@@ -39,7 +39,7 @@ class DrawableViewer(private val project: Project) :
             add(EditTargetResDirAction())
         }
         return ActionManager.getInstance()
-            .createActionToolbar("Android Drawable Viewer", actionGroup, true)
+            .createActionToolbar("OPENRNDR Thumbnails", actionGroup, true)
             .component
     }
 

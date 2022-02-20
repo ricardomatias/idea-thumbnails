@@ -1,8 +1,8 @@
 # idea-thumbnails
 
 ![Build](https://github.com/hamoid/idea-thumbnails/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/com.github.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.github.hamoid.ideathumbnails)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/com.github.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.github.hamoid.ideathumbnails)
+[![Version](https://img.shields.io/jetbrains/plugin/v/com.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.hamoid.ideathumbnails)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/com.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.hamoid.ideathumbnails)
 
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
@@ -42,6 +42,8 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 # Thumbnails
 
+- [ ] Add reload button
+- [ ] Detect file changes to reload
 - [ ] Scan .kt files that contain `fun main()` and application
 - [ ] From those files, try to read header comment which includes hashId, description, date
 - [ ] If hashId missing, create it, set date, description placeholder.

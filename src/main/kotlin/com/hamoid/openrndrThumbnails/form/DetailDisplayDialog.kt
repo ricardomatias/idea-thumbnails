@@ -1,7 +1,7 @@
-package com.androhi.androiddrawableviewer.form
+package com.hamoid.openrndrThumbnails.form
 
-import com.androhi.androiddrawableviewer.model.DrawableModel
-import com.androhi.androiddrawableviewer.utils.IconUtils
+import com.hamoid.openrndrThumbnails.model.DrawableModel
+import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBScrollPane

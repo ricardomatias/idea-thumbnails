@@ -1,4 +1,4 @@
-package com.androhi.androiddrawableviewer.utils
+package com.hamoid.openrndrThumbnails.utils
 
 import java.awt.Image
 import java.io.File

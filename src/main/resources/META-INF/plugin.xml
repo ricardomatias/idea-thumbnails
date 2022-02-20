@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.androhi.androiddrawableviewer</id>
+    <id>com.hamoid.openrndrThumbnails</id>
     <name>Thumbnailer</name>
     <vendor>aBe</vendor>
 
@@ -12,13 +12,13 @@
                     id="Thumbnailer" 
                     secondary="true"
                     icon="AllIcons.General.Modified"
-                    factoryClass="com.androhi.androiddrawableviewer.form.AndroidDrawableViewerToolWindowFactory" />
-        <projectService serviceInterface="com.androhi.androiddrawableviewer.PluginConfig"
-                        serviceImplementation="com.androhi.androiddrawableviewer.PluginConfig" />
+                    factoryClass="com.hamoid.openrndrThumbnails.form.OpenrndrThumbnailToolWindowFactory" />
+        <projectService serviceInterface="com.hamoid.openrndrThumbnails.PluginConfig"
+                        serviceImplementation="com.hamoid.openrndrThumbnails.PluginConfig" />
     </extensions>
 
     <actions>
-        <action class="com.androhi.androiddrawableviewer.action.EditTargetResDirAction" id="EditTargetResDir" />
+        <action class="com.hamoid.openrndrThumbnails.action.EditTargetResDirAction" id="EditTargetResDir" />
     </actions>
 
 </idea-plugin>
