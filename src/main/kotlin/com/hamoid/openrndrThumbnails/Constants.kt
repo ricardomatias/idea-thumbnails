@@ -8,6 +8,7 @@ class Constants {
 
         const val PATH_SEPARATOR = "/"
 
+        const val KT_SUFFIX = ".kt"
         const val PNG_SUFFIX = ".png"
         const val JPEG_SUFFIX = ".jpg"
     }

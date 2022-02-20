@@ -15,6 +15,8 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.ui.TextTransferable
 import java.awt.FlowLayout
 import java.awt.Font
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd.*
 import java.awt.event.*
 import java.io.File
 import java.util.*
@@ -61,6 +63,9 @@ class ThumbsPanel(private val project: Project) :
         }
         drawableModelList.sortBy { it.fileName }
     }
+
+    private fun isKtFile(fileName: String) =
+        fileName.endsWith(Constants.KT_SUFFIX)
 
     private fun isImageFile(fileName: String) =
         fileName.endsWith(Constants.PNG_SUFFIX) ||
@@ -137,6 +142,22 @@ class ThumbsPanel(private val project: Project) :
                 override fun keyPressed(e: KeyEvent?) {
                     if (e?.keyCode == KeyEvent.VK_ENTER) {
                         showDetailDialog()
+                    }
+                }
+            })
+            dropTarget = DropTarget(this, object : DropTargetListener {
+                override fun dragEnter(dtde: DropTargetDragEvent?) {}
+                override fun dragOver(dtde: DropTargetDragEvent?) {}
+                override fun dropActionChanged(dtde: DropTargetDragEvent?) {}
+                override fun dragExit(dte: DropTargetEvent?) {}
+
+                override fun drop(ev: DropTargetDropEvent?) {
+                    ev?.acceptDrop(DnDConstants.ACTION_COPY)
+                    val files =
+                        ev?.transferable?.getTransferData(DataFlavor.javaFileListFlavor) as List<File>?
+                            ?: listOf()
+                    files.forEach {
+                        println("dropped file: ${it.absolutePath}")
                     }
                 }
             })

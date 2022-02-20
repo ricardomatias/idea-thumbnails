@@ -49,6 +49,7 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [ ] If hashId missing, create it, set date, description placeholder.
 - [ ] Make it possible to click on image (enlarge) and name (open file to edit)
 - [ ] Decide folder name for images
+- [x] Figure out drag and drop
 - [ ] Allow drag & drop image to image placeholder to set it.
 - [ ] For programs without hash show image placeholder. Clicking on it opens file to edit.
 - [ ] Decide how to save screenshot
