@@ -12,7 +12,7 @@
                     id="Thumbnailer" 
                     secondary="true"
                     icon="AllIcons.General.Modified"
-                    factoryClass="com.hamoid.openrndrThumbnails.form.OpenrndrThumbnailToolWindowFactory" />
+                    factoryClass="com.hamoid.openrndrThumbnails.form.ThumbsToolWindowFactory" />
         <projectService serviceInterface="com.hamoid.openrndrThumbnails.PluginConfig"
                         serviceImplementation="com.hamoid.openrndrThumbnails.PluginConfig" />
     </extensions>

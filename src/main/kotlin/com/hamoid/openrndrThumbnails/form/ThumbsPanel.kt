@@ -21,7 +21,7 @@ import java.util.*
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 
-class DrawableViewer(private val project: Project) :
+class ThumbsPanel(private val project: Project) :
     SimpleToolWindowPanel(true, true), ActionListener {
 
     private val drawableModelList = mutableListOf<DrawableModel>()
@@ -94,6 +94,7 @@ class DrawableViewer(private val project: Project) :
                         override fun mouseClicked(e: MouseEvent?) {
                             println("clicked ${model.fileName}")
                         }
+
                         override fun mousePressed(e: MouseEvent?) {}
                         override fun mouseReleased(e: MouseEvent?) {}
                         override fun mouseEntered(e: MouseEvent?) {}
@@ -116,40 +117,36 @@ class DrawableViewer(private val project: Project) :
 
             addMouseListener(object : MouseListener {
                 override fun mouseReleased(e: MouseEvent?) {}
-
                 override fun mouseEntered(e: MouseEvent?) {}
+                override fun mouseExited(e: MouseEvent?) {}
+                override fun mousePressed(e: MouseEvent?) {}
 
                 override fun mouseClicked(e: MouseEvent?) {
-                    if (items.itemsCount == 0) {
-                        return
+                    if (items.itemsCount > 0) {
+                        if (previousSelectedIndex == items.selectedIndex) {
+                            showPopupMenu(e)
+                        }
+                        previousSelectedIndex = items.selectedIndex
                     }
-
-                    val selectedIndex = items.selectedIndex
-                    if (previousSelectedIndex == selectedIndex) {
-                        showPopupMenu(e)
-                    }
-                    previousSelectedIndex = selectedIndex
                 }
-
-                override fun mouseExited(e: MouseEvent?) {}
-
-                override fun mousePressed(e: MouseEvent?) {}
             })
             addKeyListener(object : KeyListener {
                 override fun keyTyped(e: KeyEvent?) {}
+                override fun keyReleased(e: KeyEvent?) {}
 
                 override fun keyPressed(e: KeyEvent?) {
                     if (e?.keyCode == KeyEvent.VK_ENTER) {
                         showDetailDialog()
                     }
                 }
-
-                override fun keyReleased(e: KeyEvent?) {}
             })
         }
         return ScrollPaneFactory.createScrollPane(items)
     }
 
+    /**
+     * Action performed in popup menu
+     */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.actionCommand) {
             MENU_ITEM_SHOW -> showDetailDialog()
@@ -157,12 +154,15 @@ class DrawableViewer(private val project: Project) :
         }
     }
 
+    /**
+     * Construct and show popup menu
+     */
     private fun showPopupMenu(event: MouseEvent?) {
         val showMenu = JMenuItem(MENU_ITEM_SHOW).apply {
-            addActionListener(this@DrawableViewer)
+            addActionListener(this@ThumbsPanel)
         }
         val copyDrawableIdMenu = JMenuItem(MENU_ITEM_COPY_DRAWABLE_RES).apply {
-            addActionListener(this@DrawableViewer)
+            addActionListener(this@ThumbsPanel)
         }
         val popupMenu = JPopupMenu().apply {
             add(showMenu)
@@ -174,14 +174,18 @@ class DrawableViewer(private val project: Project) :
         }
     }
 
-    // popup action 1
+    /**
+     * Popup action 1
+     */
     private fun showDetailDialog() {
         items.minSelectionIndex.let { index: Int ->
             DetailDisplayDialog(project, drawableModelList[index]).show()
         }
     }
 
-    // popup action 2
+    /**
+     * Popup action 2
+     */
     private fun copyDrawableId() {
         items.minSelectionIndex.let { index: Int ->
             var fileName = drawableModelList[index].fileName

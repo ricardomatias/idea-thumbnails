@@ -83,8 +83,8 @@ class DetailDisplayDialog(project: Project, drawableModel: DrawableModel) :
         }
 
     private fun updateContainer(newPanel: JPanel, oldPanel: JPanel?) {
-        val e2 = if (oldPanel == null) SpringLayout.WEST else SpringLayout.EAST
-        val c2 = oldPanel ?: subPanel
+        val layout = if (oldPanel == null) SpringLayout.WEST else SpringLayout.EAST
+        val panel = oldPanel ?: subPanel
         springLayout?.run {
             putConstraint(
                 SpringLayout.NORTH, newPanel, VERTICAL_PADDING,
@@ -92,7 +92,7 @@ class DetailDisplayDialog(project: Project, drawableModel: DrawableModel) :
             )
             putConstraint(
                 SpringLayout.WEST, newPanel, HORIZONTAL_PADDING,
-                e2, c2
+                layout, panel
             )
         }
         subPanel.add(newPanel)

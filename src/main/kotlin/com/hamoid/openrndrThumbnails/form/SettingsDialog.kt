@@ -66,9 +66,9 @@ class SettingsDialog(private val project: Project?) : DialogWrapper(project, tru
 
     private fun resetContent() {
         project?.let {
-            val drawableViewer = DrawableViewer(it)
+            val thumbsPanel = ThumbsPanel(it)
             ToolWindowManager.getInstance(it).getToolWindow(Constants.TOOL_WINDOW_ID)?.contentManager?.apply {
-                val content = factory.createContent(drawableViewer, null, false)
+                val content = factory.createContent(thumbsPanel, null, false)
                 removeAllContents(true)
                 addContent(content)
             }
