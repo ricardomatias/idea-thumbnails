@@ -1,17 +1,18 @@
 package com.hamoid.openrndrThumbnails.form
 
-import com.hamoid.openrndrThumbnails.model.DrawableModel
-import com.hamoid.openrndrThumbnails.utils.IconUtils
+import com.hamoid.openrndrThumbnails.model.KotlinFile
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBScrollPane
-import java.awt.BorderLayout
 import java.awt.Dimension
-import javax.swing.*
-import javax.swing.ScrollPaneConstants.*
-import javax.swing.border.SoftBevelBorder
+import javax.swing.Action
+import javax.swing.JComponent
+import javax.swing.JPanel
+import javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
+import javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
+import javax.swing.SpringLayout
 
-class DetailDisplayDialog(project: Project, drawableModel: DrawableModel) :
+class OriginalImageDialog(project: Project, kotlinFile: KotlinFile) :
     DialogWrapper(project, true) {
 
     private var mainPanel: JPanel? = null
@@ -20,58 +21,52 @@ class DetailDisplayDialog(project: Project, drawableModel: DrawableModel) :
 
     init {
         springLayout = SpringLayout()
-
-        subPanel.run {
-            layout = springLayout
-        }
+        subPanel.layout = springLayout
 
         isAutoAdjustable = false
         setResizable(true)
         setSize(480, 360)
 
-        title = drawableModel.fileName
+        title = kotlinFile.relativePath()
 
-        createContent(drawableModel)
+        createContent(kotlinFile)
         init()
     }
 
-    private fun createContent(model: DrawableModel) {
+    private fun createContent(model: KotlinFile) {
         addDisplayImage(model)
     }
 
-    // todo: make it crawlable
-    private fun addDisplayImage(
-        model: DrawableModel
-    ) {
+    private fun addDisplayImage(model: KotlinFile) {
         var oldPanel: JPanel? = null
-        var panelWidth = HORIZONTAL_PADDING
-        var panelHeight = 0
-
-        mainPanel?.add(createScrollPane(), BorderLayout.CENTER)
-
-        model.filePathList.forEach { filePath ->
-
-            val iconLabel = JLabel().apply {
-                icon = IconUtils.createOriginalIcon(filePath)
-                border = SoftBevelBorder(SoftBevelBorder.LOWERED)
-            }
-
-            val panel = JPanel().apply {
-                layout = BorderLayout()
-                add(iconLabel, BorderLayout.CENTER)
-            }
-
-            updateContainer(panel, oldPanel)
-
-            panelWidth += panel.width + HORIZONTAL_PADDING
-            if (panelHeight < panel.height) {
-                panelHeight = panel.height
-            }
-
-            oldPanel = panel
-        }
-
-        setContainerSize(panelWidth, panelHeight)
+//        var panelWidth = HORIZONTAL_PADDING
+//        var panelHeight = 0
+//
+//        mainPanel?.add(createScrollPane(), BorderLayout.CENTER)
+//
+//        model.filePathList.forEach { filePath ->
+//
+//            val iconLabel = JLabel().apply {
+//                icon = IconUtils.createOriginalIcon(filePath)
+//                border = SoftBevelBorder(SoftBevelBorder.LOWERED)
+//            }
+//
+//            val panel = JPanel().apply {
+//                layout = BorderLayout()
+//                add(iconLabel, BorderLayout.CENTER)
+//            }
+//
+//            updateContainer(panel, oldPanel)
+//
+//            panelWidth += panel.width + HORIZONTAL_PADDING
+//            if (panelHeight < panel.height) {
+//                panelHeight = panel.height
+//            }
+//
+//            oldPanel = panel
+//        }
+//
+//        setContainerSize(panelWidth, panelHeight)
     }
 
     private fun createScrollPane() =
@@ -83,7 +78,8 @@ class DetailDisplayDialog(project: Project, drawableModel: DrawableModel) :
         }
 
     private fun updateContainer(newPanel: JPanel, oldPanel: JPanel?) {
-        val layout = if (oldPanel == null) SpringLayout.WEST else SpringLayout.EAST
+        val layout =
+            if (oldPanel == null) SpringLayout.WEST else SpringLayout.EAST
         val panel = oldPanel ?: subPanel
         springLayout?.run {
             putConstraint(

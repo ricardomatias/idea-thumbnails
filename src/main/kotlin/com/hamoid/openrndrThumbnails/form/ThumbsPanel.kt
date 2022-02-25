@@ -1,10 +1,9 @@
 package com.hamoid.openrndrThumbnails.form
 
 import com.hamoid.openrndrThumbnails.Constants
-import com.hamoid.openrndrThumbnails.PluginConfig
-import com.hamoid.openrndrThumbnails.action.EditTargetResDirAction
-import com.hamoid.openrndrThumbnails.model.DrawableModel
-import com.hamoid.openrndrThumbnails.utils.IconUtils
+import com.hamoid.openrndrThumbnails.action.OpenSettingsAction
+import com.hamoid.openrndrThumbnails.action.ReloadAction
+import com.hamoid.openrndrThumbnails.model.KotlinFile
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.ide.CopyPasteManager
@@ -19,16 +18,17 @@ import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.*
 import java.awt.event.*
 import java.io.File
-import java.util.*
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 
+/**
+ * Main Panel
+ */
 class ThumbsPanel(private val project: Project) :
     SimpleToolWindowPanel(true, true), ActionListener {
 
-    private val drawableModelList = mutableListOf<DrawableModel>()
-    private var items = JBList(emptyList<JPanel>())
-
+    private val kotlinFileList = mutableListOf<KotlinFile>()
+    private var panelList = JBList(emptyList<JPanel>())
     private var previousSelectedIndex = 0
 
     init {
@@ -36,86 +36,85 @@ class ThumbsPanel(private val project: Project) :
         setContent(createContentPanel())
     }
 
+    /**
+     * Create main tool bar with the settings wrench icon
+     */
     private fun createToolbarPanel(): JComponent {
-        val actionGroup = DefaultActionGroup().apply {
-            add(EditTargetResDirAction())
-        }
+        val actionGroup = DefaultActionGroup()
+        actionGroup.add(OpenSettingsAction())
+        actionGroup.add(ReloadAction(this::reload))
         return ActionManager.getInstance()
             .createActionToolbar("OPENRNDR Thumbnails", actionGroup, true)
             .component
     }
 
+    private fun reload() {
+        // TODO: rebuild panel (empty it, populate it)
+        println("reload")
+    }
+
+    /**
+     * Create main content: a scrollable panel with entries
+     */
     private fun createContentPanel(): JScrollPane {
-        createDrawableModelList()
-        return createScrollPane(createPanels())
+        //val pluginConfig = PluginConfig.getInstance(project)
+        KotlinFile.root = File(project.basePath + Constants.DEFAULT_SOURCE_PATH)
+        val files = scanFiles(KotlinFile.root)
+        kotlinFileList.addAll(files.map { KotlinFile(it) })
+        val panels = filesToPanels(kotlinFileList)
+        return createScrollPane(panels)
     }
 
-    private fun createDrawableModelList() {
-        val pluginConfig = PluginConfig.getInstance(project)
-        val srcDir = pluginConfig.srcDir
-            ?: (project.basePath + Constants.DEFAULT_SOURCE_PATH)
-        val imageFileList = getNewFileList(srcDir, pluginConfig)
-        val fileNameList =
-            imageFileList.map { it.name }.filter { isImageFile(it) }.distinct()
-        fileNameList.forEach { fileName ->
-            val model = DrawableModel.create(fileName, imageFileList)
-            drawableModelList.add(model)
-        }
-        drawableModelList.sortBy { it.fileName }
-    }
-
-    private fun isKtFile(fileName: String) =
-        fileName.endsWith(Constants.KT_SUFFIX)
-
-    private fun isImageFile(fileName: String) =
-        fileName.endsWith(Constants.PNG_SUFFIX) ||
-                fileName.endsWith(Constants.JPEG_SUFFIX)
-
-    private fun getNewFileList(path: String, config: PluginConfig): List<File> {
-        val targetDir = File(path)
+    /**
+     * Scans folder for Kotlin files
+     */
+    private fun scanFiles(targetDir: File): List<File> {
         if (!targetDir.exists()) {
             return listOf()
         }
-        val files = targetDir.listFiles()
-        return files?.toList() ?: listOf()
+        return targetDir.walkTopDown().toList().filter {
+            it.name.endsWith(Constants.KT_SUFFIX)
+        }.sorted()
     }
 
-    private fun createPanels(): Vector<JPanel> {
-        val panels = Vector<JPanel>(drawableModelList.size)
-        drawableModelList.forEach { model ->
+    /**
+     * Converts list of [KotlinFile] to UI panels
+     */
+    private fun filesToPanels(kotlinFiles: List<KotlinFile>) =
+        kotlinFiles.map { model ->
             val panel = JPanel().apply {
-                layout = FlowLayout()
-                border = EmptyBorder(10, 10, 10, 10)
-            }
-
-            IconUtils.createSmallIcon(model.getLowDensityFilePath())?.let {
-                val iconLabel = JLabel().apply {
-                    icon = it
-                    text = model.fileName
-                    horizontalAlignment = JLabel.LEFT
-                    font = Font(Font.SANS_SERIF, Font.PLAIN, 14)
-                    iconTextGap = 12
-                    addMouseListener(object : MouseListener {
-                        override fun mouseClicked(e: MouseEvent?) {
-                            println("clicked ${model.fileName}")
-                        }
-
-                        override fun mousePressed(e: MouseEvent?) {}
-                        override fun mouseReleased(e: MouseEvent?) {}
-                        override fun mouseEntered(e: MouseEvent?) {}
-                        override fun mouseExited(e: MouseEvent?) {}
-                    })
+                layout = FlowLayout().apply {
+                    alignment = FlowLayout.LEFT
                 }
-                panel.add(iconLabel)
-                panels.add(panel)
+                border = EmptyBorder(8, 8, 8, 8)
             }
+
+            panel.add(JLabel(model.relativePath(), JLabel.LEFT).apply {
+                //icon = IconUtils.createSmallIcon(model.fileName)
+                font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+                iconTextGap = 12
+                // TODO: distinguish clicking on image and on text
+                addMouseListener(object : MouseListener {
+                    override fun mousePressed(e: MouseEvent?) {}
+                    override fun mouseReleased(e: MouseEvent?) {}
+                    override fun mouseEntered(e: MouseEvent?) {}
+                    override fun mouseExited(e: MouseEvent?) {}
+                    override fun mouseClicked(e: MouseEvent?) {
+                        println("clicked ${model.path}")
+                    }
+                })
+            })
+            panel
         }
 
-        return panels
-    }
 
-    private fun createScrollPane(panels: Vector<JPanel>): JScrollPane {
-        items = JBList(panels.toMutableList()).apply {
+    /**
+     * Creates a scroll pane with all the panels, add event listeners
+     */
+    private fun createScrollPane(items: List<JPanel>): JScrollPane {
+        panelList = JBList(items)
+        //panelList.removeAll()
+        panelList.apply {
             selectionMode = ListSelectionModel.SINGLE_SELECTION
             layoutOrientation = JList.VERTICAL
             cellRenderer = ImageListCellRenderer()
@@ -125,44 +124,52 @@ class ThumbsPanel(private val project: Project) :
                 override fun mouseEntered(e: MouseEvent?) {}
                 override fun mouseExited(e: MouseEvent?) {}
                 override fun mousePressed(e: MouseEvent?) {}
-
                 override fun mouseClicked(e: MouseEvent?) {
-                    if (items.itemsCount > 0) {
-                        if (previousSelectedIndex == items.selectedIndex) {
+                    if (panelList.itemsCount > 0) {
+                        if (previousSelectedIndex == panelList.selectedIndex) {
                             showPopupMenu(e)
+                        } else {
+                            previousSelectedIndex = panelList.selectedIndex
                         }
-                        previousSelectedIndex = items.selectedIndex
                     }
                 }
             })
+
             addKeyListener(object : KeyListener {
                 override fun keyTyped(e: KeyEvent?) {}
                 override fun keyReleased(e: KeyEvent?) {}
-
                 override fun keyPressed(e: KeyEvent?) {
                     if (e?.keyCode == KeyEvent.VK_ENTER) {
-                        showDetailDialog()
+                        showOriginalImage()
                     }
                 }
             })
+
+            /**
+             * Use to drop images into the list, then assign that image
+             * as a thumbnail for the target .kt program
+             */
             dropTarget = DropTarget(this, object : DropTargetListener {
                 override fun dragEnter(dtde: DropTargetDragEvent?) {}
                 override fun dragOver(dtde: DropTargetDragEvent?) {}
                 override fun dropActionChanged(dtde: DropTargetDragEvent?) {}
                 override fun dragExit(dte: DropTargetEvent?) {}
-
                 override fun drop(ev: DropTargetDropEvent?) {
                     ev?.acceptDrop(DnDConstants.ACTION_COPY)
-                    val files =
-                        ev?.transferable?.getTransferData(DataFlavor.javaFileListFlavor) as List<File>?
-                            ?: listOf()
+
+                    val files = ev?.transferable?.getTransferData(
+                        DataFlavor.javaFileListFlavor
+                    ) as List<*>? ?: listOf("")
+
                     files.forEach {
-                        println("dropped file: ${it.absolutePath}")
+                        if (it is File) {
+                            println("dropped file: ${it.absolutePath}")
+                        }
                     }
                 }
             })
         }
-        return ScrollPaneFactory.createScrollPane(items)
+        return ScrollPaneFactory.createScrollPane(panelList)
     }
 
     /**
@@ -170,8 +177,8 @@ class ThumbsPanel(private val project: Project) :
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.actionCommand) {
-            MENU_ITEM_SHOW -> showDetailDialog()
-            MENU_ITEM_COPY_DRAWABLE_RES -> copyDrawableId()
+            MenuItem.SHOW.label -> showOriginalImage()
+            MenuItem.COPY_SOMETHING.label -> copyDrawableId()
         }
     }
 
@@ -179,15 +186,13 @@ class ThumbsPanel(private val project: Project) :
      * Construct and show popup menu
      */
     private fun showPopupMenu(event: MouseEvent?) {
-        val showMenu = JMenuItem(MENU_ITEM_SHOW).apply {
-            addActionListener(this@ThumbsPanel)
-        }
-        val copyDrawableIdMenu = JMenuItem(MENU_ITEM_COPY_DRAWABLE_RES).apply {
-            addActionListener(this@ThumbsPanel)
-        }
         val popupMenu = JPopupMenu().apply {
-            add(showMenu)
-            add(copyDrawableIdMenu)
+            add(JMenuItem(MenuItem.SHOW.label).apply {
+                addActionListener(this@ThumbsPanel)
+            })
+            add(JMenuItem(MenuItem.COPY_SOMETHING.label).apply {
+                addActionListener(this@ThumbsPanel)
+            })
         }
 
         event?.let {
@@ -198,9 +203,9 @@ class ThumbsPanel(private val project: Project) :
     /**
      * Popup action 1
      */
-    private fun showDetailDialog() {
-        items.minSelectionIndex.let { index: Int ->
-            DetailDisplayDialog(project, drawableModelList[index]).show()
+    private fun showOriginalImage() {
+        panelList.minSelectionIndex.let { index: Int ->
+            OriginalImageDialog(project, kotlinFileList[index]).show()
         }
     }
 
@@ -208,21 +213,23 @@ class ThumbsPanel(private val project: Project) :
      * Popup action 2
      */
     private fun copyDrawableId() {
-        items.minSelectionIndex.let { index: Int ->
-            var fileName = drawableModelList[index].fileName
-            val periodPosition = fileName.lastIndexOf(".")
-            if (periodPosition >= 0) {
-                fileName = fileName.substring(0, periodPosition)
-            }
-            val fileNameWithoutExtension = fileName
-            val str =
-                java.lang.StringBuilder("R.drawable.$fileNameWithoutExtension")
+        panelList.minSelectionIndex.let { //index: Int ->
+//            var fileName = drawableModelList[index].fileName
+//            val periodPosition = fileName.lastIndexOf(".")
+//            if (periodPosition >= 0) {
+//                fileName = fileName.substring(0, periodPosition)
+//            }
+//            val fileNameWithoutExtension = fileName
+            val str = java.lang.StringBuilder("foo")
             CopyPasteManager.getInstance().setContents(TextTransferable(str))
         }
     }
+}
 
-    companion object {
-        const val MENU_ITEM_SHOW = "Show"
-        const val MENU_ITEM_COPY_DRAWABLE_RES = "Copy Drawable Res"
-    }
+/**
+ * Available popup menu items
+ */
+enum class MenuItem(val label: String) {
+    SHOW("Show"),
+    COPY_SOMETHING("Copy Something")
 }

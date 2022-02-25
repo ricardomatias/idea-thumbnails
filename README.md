@@ -42,16 +42,18 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 # Thumbnails
 
-- [ ] Add reload button
-- [ ] Detect file changes to reload
-- [ ] Scan .kt files that contain `fun main()` and application
-- [ ] From those files, try to read header comment which includes hashId, description, date
-- [ ] If hashId missing, create it, set date, description placeholder.
+- [x] Scan .kt files, sort 
+- [x] ~~filter files that contain `application`~~ Show all .kt files instead
+- [x] load file contents into model
+- [x] Figure out drag and drop
+- [x] From those files, try to read header comment which includes hashId, description, date
+- [x] If hashId missing, create it, set date, description placeholder.
+- [x] Add reload button
 - [ ] Make it possible to click on image (enlarge) and name (open file to edit)
 - [ ] Decide folder name for images
-- [x] Figure out drag and drop
 - [ ] Allow drag & drop image to image placeholder to set it.
 - [ ] For programs without hash show image placeholder. Clicking on it opens file to edit.
 - [ ] Decide how to save screenshot
 - [ ] Add filter box at the top of the plugin window.
 - [ ] Nice to have: allow multiple screenshots per program.
+- [ ] Detect file changes to reload

@@ -25,7 +25,7 @@ class IconUtils {
                 }
             )
         } catch (e: IOException) {
-            null
+            null // TODO return placeholder icon
         }
     }
 }

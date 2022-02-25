@@ -8,17 +8,17 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow anchor="right" canCloseContents="true" 
-                    id="Thumbnailer" 
-                    secondary="true"
-                    icon="AllIcons.General.Modified"
-                    factoryClass="com.hamoid.openrndrThumbnails.form.ThumbsToolWindowFactory" />
-        <projectService serviceInterface="com.hamoid.openrndrThumbnails.PluginConfig"
-                        serviceImplementation="com.hamoid.openrndrThumbnails.PluginConfig" />
+        <toolWindow anchor="right" canCloseContents="true" id="Thumbnailer"
+                    secondary="true" icon="AllIcons.General.Modified"
+                    factoryClass="com.hamoid.openrndrThumbnails.form.ThumbsToolWindowFactory"/>
+        <projectService
+                serviceInterface="com.hamoid.openrndrThumbnails.PluginConfig"
+                serviceImplementation="com.hamoid.openrndrThumbnails.PluginConfig"/>
     </extensions>
 
     <actions>
-        <action class="com.hamoid.openrndrThumbnails.action.EditTargetResDirAction" id="EditTargetResDir" />
+        <action class="com.hamoid.openrndrThumbnails.action.OpenSettingsAction"
+                id="OpenSettings"/>
     </actions>
 
 </idea-plugin>

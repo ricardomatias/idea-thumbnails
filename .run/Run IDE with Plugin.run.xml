@@ -14,7 +14,7 @@
           <option value="runIde" />
         </list>
       </option>
-      <option name="vmOptions" value="" />
+      <option name="vmOptions" value="--add-exports java.base/jdk.internal.vm=ALL-UNNAMED" />
     </ExternalSystemSettings>
     <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>

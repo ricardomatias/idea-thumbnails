@@ -17,15 +17,14 @@ class PluginConfig : PersistentStateComponent<PluginConfig> {
 
     var srcDir: String? = null
 
-    override fun getState(): PluginConfig = this
+    override fun getState() = this
 
     override fun loadState(pluginConfig: PluginConfig) {
-        pluginConfig.let {
-            XmlSerializerUtil.copyBean(it, this)
-        }
+        XmlSerializerUtil.copyBean(pluginConfig, this)
     }
 
     companion object {
-        fun getInstance(project: Project): PluginConfig = ServiceManager.getService(project, PluginConfig::class.java)
+        fun getInstance(project: Project): PluginConfig =
+            ServiceManager.getService(project, PluginConfig::class.java)
     }
 }
