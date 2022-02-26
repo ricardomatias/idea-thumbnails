@@ -27,11 +27,13 @@ import javax.swing.border.EmptyBorder
 class ThumbsPanel(private val project: Project) :
     SimpleToolWindowPanel(true, true), ActionListener {
 
+    private val thumbsPath = File("${project.basePath}/.thumbnails")
     private val kotlinFileList = mutableListOf<KotlinFile>()
     private var panelList = JBList(emptyList<JPanel>())
     private var previousSelectedIndex = 0
 
     init {
+        thumbsPath.mkdirs()
         toolbar = createToolbarPanel()
         setContent(createContentPanel())
     }
@@ -117,7 +119,7 @@ class ThumbsPanel(private val project: Project) :
         panelList.apply {
             selectionMode = ListSelectionModel.SINGLE_SELECTION
             layoutOrientation = JList.VERTICAL
-            cellRenderer = ImageListCellRenderer()
+            cellRenderer = CellStyle()
 
             addMouseListener(object : MouseListener {
                 override fun mouseReleased(e: MouseEvent?) {}
@@ -128,9 +130,8 @@ class ThumbsPanel(private val project: Project) :
                     if (panelList.itemsCount > 0) {
                         if (previousSelectedIndex == panelList.selectedIndex) {
                             showPopupMenu(e)
-                        } else {
-                            previousSelectedIndex = panelList.selectedIndex
                         }
+                        previousSelectedIndex = panelList.selectedIndex
                     }
                 }
             })
@@ -155,15 +156,21 @@ class ThumbsPanel(private val project: Project) :
                 override fun dropActionChanged(dtde: DropTargetDragEvent?) {}
                 override fun dragExit(dte: DropTargetEvent?) {}
                 override fun drop(ev: DropTargetDropEvent?) {
-                    ev?.acceptDrop(DnDConstants.ACTION_COPY)
+                    if(ev == null) return
+                    ev.acceptDrop(DnDConstants.ACTION_COPY)
 
-                    val files = ev?.transferable?.getTransferData(
+                    val files = ev.transferable?.getTransferData(
                         DataFlavor.javaFileListFlavor
                     ) as List<*>? ?: listOf("")
 
-                    files.forEach {
-                        if (it is File) {
-                            println("dropped file: ${it.absolutePath}")
+                    val img = files.first()
+                    if(img is File && img.name.endsWith(Constants.PNG_SUFFIX)) {
+                        val i = panelList.selectedIndex
+                        if(i >= 0) {
+                            val kf = kotlinFileList[i]
+                            println("For: ${kf.path.path}")
+                            println("copy ${img.absolutePath}")
+                            println("to $thumbsPath/${kf.id}.png")
                         }
                     }
                 }

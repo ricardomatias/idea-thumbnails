@@ -7,7 +7,7 @@ import javax.swing.*
 /**
  * Changes the cell rendering style depending on if it is selected or not.
  */
-class ImageListCellRenderer : ListCellRenderer<Any> {
+class CellStyle : ListCellRenderer<Any> {
     override fun getListCellRendererComponent(
         list: JList<out Any>?,
         value: Any?,

@@ -49,12 +49,18 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] From those files, try to read header comment which includes hashId, description, date
 - [x] If hashId missing, create it, set date, description placeholder.
 - [x] Add reload button
-- [ ] Make it possible to click on image (enlarge) and name (open file to edit)
 - [x] Decide folder name for images: .thumbnails
-- [ ] Create .thumbnails on start if missing
-- [ ] Allow drag & drop image to image placeholder to set it.
+- [x] Create .thumbnails on start if missing
+- [x] Allow drag & drop image to image placeholder to set it.
+- [ ] Activate updating real .kt files with header (now using /tmp)
+- [ ] Copy image upon drag and drop
+- [ ] Enable plugin only if project is openrndr-template
+- [ ] Ask in Slack how to detect item in list under mouse when d&d
+      or add events to each JPanel instead of to the JBList
+- [ ] Make it possible to click on image (enlarge) and name (open file to edit)
 - [ ] For programs without hash show image placeholder. Clicking on it opens file to edit.
 - [ ] Decide how to save screenshot
-- [ ] Add filter box at the top of the plugin window.
+- [ ] Add filter by name
+- [ ] Add filter for with/missing/both thumbnail
 - [ ] Nice to have: allow multiple screenshots per program.
 - [ ] Detect file changes to reload
