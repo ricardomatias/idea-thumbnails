@@ -10,7 +10,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
  * Called by plugin.xml
  * Everything starts here.
  */
-class ThumbsToolWindowFactory : ToolWindowFactory {
+class Factory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, win: ToolWindow) {
         win.contentManager.apply {
             addContent(
