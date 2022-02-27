@@ -4,6 +4,13 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/com.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.hamoid.ideathumbnails)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/com.hamoid.ideathumbnails.svg)](https://plugins.jetbrains.com/plugin/com.hamoid.ideathumbnails)
 
+## Work in progress!
+
+Not ready for public consumption. 
+Probably dangerous: it does edit your .kt files automatically!
+
+And it's my first Idea plugin.
+
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
 - [x] Get familiar with the [template documentation][template].
@@ -52,15 +59,14 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Decide folder name for images: .thumbnails
 - [x] Create .thumbnails on start if missing
 - [x] Allow drag & drop image to image placeholder to set it.
-- [ ] Activate updating real .kt files with header (now using /tmp)
-- [ ] Copy image upon drag and drop
+- [x] Ask in Slack how to detect item in list under mouse. Figured out!
+- [x] Copy image upon drag and drop
+- [x] Activate updating real .kt files with header (now using /tmp)
 - [ ] Enable plugin only if project is openrndr-template
-- [ ] Ask in Slack how to detect item in list under mouse when d&d
-      or add events to each JPanel instead of to the JBList
 - [ ] Make it possible to click on image (enlarge) and name (open file to edit)
-- [ ] For programs without hash show image placeholder. Clicking on it opens file to edit.
+- [x] For programs without hash show image placeholder. Clicking on it opens file to edit.
 - [ ] Decide how to save screenshot
-- [ ] Add filter by name
+- [ ] Add filter-by-name
 - [ ] Add filter for with/missing/both thumbnail
-- [ ] Nice to have: allow multiple screenshots per program.
+- [ ] Add filter-by-age
 - [ ] Detect file changes to reload

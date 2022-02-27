@@ -4,6 +4,8 @@ import com.hamoid.openrndrThumbnails.Constants
 import com.hamoid.openrndrThumbnails.action.OpenSettingsAction
 import com.hamoid.openrndrThumbnails.action.ReloadAction
 import com.hamoid.openrndrThumbnails.model.KotlinFile
+import com.hamoid.openrndrThumbnails.utils.IconUtils
+import com.hamoid.openrndrThumbnails.utils.IconUtils.Companion.save
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.ide.CopyPasteManager
@@ -27,21 +29,24 @@ import javax.swing.border.EmptyBorder
 class ThumbsPanel(private val project: Project) :
     SimpleToolWindowPanel(true, true), ActionListener {
 
-    private val thumbsPath = File("${project.basePath}/.thumbnails")
+    private val thumbsRootPath = File("${project.basePath}/.thumbnails")
     private val kotlinFileList = mutableListOf<KotlinFile>()
     private var panelList = JBList(emptyList<JPanel>())
     private var previousSelectedIndex = 0
 
+    private fun thumbPath(kotlinFile: KotlinFile) =
+        "$thumbsRootPath/${kotlinFile.id}.png"
+
     init {
-        thumbsPath.mkdirs()
-        toolbar = createToolbarPanel()
-        setContent(createContentPanel())
+        thumbsRootPath.mkdirs()
+        toolbar = createToolbar()
+        setContent(createScrollPane())
     }
 
     /**
      * Create main tool bar with the settings wrench icon
      */
-    private fun createToolbarPanel(): JComponent {
+    private fun createToolbar(): JComponent {
         val actionGroup = DefaultActionGroup()
         actionGroup.add(OpenSettingsAction())
         actionGroup.add(ReloadAction(this::reload))
@@ -58,13 +63,15 @@ class ThumbsPanel(private val project: Project) :
     /**
      * Create main content: a scrollable panel with entries
      */
-    private fun createContentPanel(): JScrollPane {
+    private fun createScrollPane(): JScrollPane {
         //val pluginConfig = PluginConfig.getInstance(project)
         KotlinFile.root = File(project.basePath + Constants.DEFAULT_SOURCE_PATH)
+
         val files = scanFiles(KotlinFile.root)
         kotlinFileList.addAll(files.map { KotlinFile(it) })
-        val panels = filesToPanels(kotlinFileList)
-        return createScrollPane(panels)
+
+        val panelList = filesToPanels(kotlinFileList)
+        return createScrollPane(panelList)
     }
 
     /**
@@ -83,7 +90,7 @@ class ThumbsPanel(private val project: Project) :
      * Converts list of [KotlinFile] to UI panels
      */
     private fun filesToPanels(kotlinFiles: List<KotlinFile>) =
-        kotlinFiles.map { model ->
+        kotlinFiles.map { kotlinFile ->
             val panel = JPanel().apply {
                 layout = FlowLayout().apply {
                     alignment = FlowLayout.LEFT
@@ -91,8 +98,8 @@ class ThumbsPanel(private val project: Project) :
                 border = EmptyBorder(8, 8, 8, 8)
             }
 
-            panel.add(JLabel(model.relativePath(), JLabel.LEFT).apply {
-                //icon = IconUtils.createSmallIcon(model.fileName)
+            panel.add(JLabel(kotlinFile.relativePath(), JLabel.LEFT).apply {
+                icon = IconUtils.createSmallIcon(thumbPath(kotlinFile))
                 font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
                 iconTextGap = 12
                 // TODO: distinguish clicking on image and on text
@@ -102,7 +109,7 @@ class ThumbsPanel(private val project: Project) :
                     override fun mouseEntered(e: MouseEvent?) {}
                     override fun mouseExited(e: MouseEvent?) {}
                     override fun mouseClicked(e: MouseEvent?) {
-                        println("clicked ${model.path}")
+                        println("clicked ${kotlinFile.path}")
                     }
                 })
             })
@@ -156,7 +163,7 @@ class ThumbsPanel(private val project: Project) :
                 override fun dropActionChanged(dtde: DropTargetDragEvent?) {}
                 override fun dragExit(dte: DropTargetEvent?) {}
                 override fun drop(ev: DropTargetDropEvent?) {
-                    if(ev == null) return
+                    if (ev == null) return
                     ev.acceptDrop(DnDConstants.ACTION_COPY)
 
                     val files = ev.transferable?.getTransferData(
@@ -164,13 +171,21 @@ class ThumbsPanel(private val project: Project) :
                     ) as List<*>? ?: listOf("")
 
                     val img = files.first()
-                    if(img is File && img.name.endsWith(Constants.PNG_SUFFIX)) {
-                        val i = panelList.selectedIndex
-                        if(i >= 0) {
-                            val kf = kotlinFileList[i]
-                            println("For: ${kf.path.path}")
-                            println("copy ${img.absolutePath}")
-                            println("to $thumbsPath/${kf.id}.png")
+                    if (img is File && img.name.endsWith(Constants.PNG_SUFFIX)) {
+                        val i = panelList.locationToIndex(ev.location)
+                        if (i >= 0) {
+                            val from = img.absolutePath
+                            val to = thumbPath(kotlinFileList[i])
+                            val icon = IconUtils.createIcon(from, 640)
+                            icon.save(to)
+
+                            val panel = panelList.model.getElementAt(i)
+                            val label = panel.getComponent(0) as JLabel
+                            label.icon = IconUtils.createSmallIcon(to)
+                            label.revalidate()
+                            label.repaint(100)
+                            panelList.revalidate()
+                            panelList.repaint(100)
                         }
                     }
                 }

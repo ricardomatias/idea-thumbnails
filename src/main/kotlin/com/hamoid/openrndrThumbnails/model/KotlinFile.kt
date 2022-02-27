@@ -29,33 +29,39 @@ data class KotlinFile(val path: File) {
         val i = 1 + lines.indexOfLast { it.startsWith("import ") }
         lines.add(i, header)
 
-        val newPath = File("/tmp/src/${relativePath()}")
-        newPath.parentFile.mkdirs()
-        newPath.writeText(lines.joinToString("\n"))
+        path.writeText(
+            lines.joinToString("\n", postfix = "\n")
+        )
     }
 
     /**
      * Parses header ([id], [description], [tags]) from [content]
      */
     private fun parseHeader() {
+        // find first block comment in the kt file
         val blockComment = rxBlockComment.find(content)
         if (blockComment != null) {
+            // trim the comment lines removing ' ' and '*' and
+            // join into one long line separated with spaces
             val commentLines = blockComment.groupValues[1].split("\n")
-            val compactHeader = commentLines
-                .map { it.trim('*', ' ') }
-                .joinToString(" ")
+            val compactHeader = commentLines.joinToString(" ") {
+                it.trim('*', ' ')
+            }
+            // in that line, try find id,  description and tags
             val props = rxProperties.find(compactHeader)
             if (props != null) {
+                // if found, set vars and return
                 id = props.groupValues[1]
                 description = props.groupValues[2]
                 tags = props.groupValues[3]
-            } else {
-                id = UUID.randomUUID().toString()
-                description = "New sketch"
-                tags = "#new"
-                saveWithNewHeader()
+                return
             }
         }
+        // if not found, generate id, description and tags, save file
+        id = UUID.randomUUID().toString()
+        description = "New sketch"
+        tags = "#new"
+        saveWithNewHeader()
     }
 
     fun reload() {
@@ -79,6 +85,7 @@ data class KotlinFile(val path: File) {
     }
 
     companion object {
+        // Set before creating any KotlinFile instances!
         lateinit var root: File
 
         // rx to get inner content of /** ??? */
