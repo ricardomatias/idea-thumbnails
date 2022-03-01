@@ -10,49 +10,50 @@ import javax.swing.ImageIcon
 
 class IconUtils {
     companion object {
-        fun createSmallIcon(iconFilePath: String) =
-            createIcon(iconFilePath, 100)
+        fun createSmallIcon(path: String) =
+            createIcon(path, 100)
 
-        fun createIcon(iconFilePath: String, width: Int = 0): ImageIcon {
-            val file = File(iconFilePath)
+        fun createIcon(path: String, width: Int = 0): ImageIcon {
+            val img = loadImage(path)
+            return ImageIcon(if (width > 0) img.scaled(width) else img)
+        }
+
+        fun loadImage(path: String): Image {
+            val file = File(path)
 
             if (!file.exists()) {
-                return emptyIcon()
+                return emptyImage()
             }
 
             return try {
-                val img = ImageIO.read(file)
-
-                if (width > 0) {
-                    ImageIcon(
-                        img.getScaledInstance(
-                            width, width * img.height / img.width,
-                            Image.SCALE_SMOOTH
-                        )
-                    )
-                } else {
-                    ImageIcon(img)
-                }
-
-
+                ImageIO.read(file)
             } catch (e: IOException) {
-                emptyIcon()
+                emptyImage()
             }
+
         }
 
-        private fun emptyIcon() = ImageIcon(
-            BufferedImage(100, 16, BufferedImage.TYPE_INT_ARGB)
+        private fun emptyImage() = BufferedImage(
+            100, 16, BufferedImage.TYPE_INT_ARGB
         )
 
-        fun ImageIcon.save(iconFilePath: String) {
-            val img = BufferedImage(
-                iconWidth, iconHeight, BufferedImage.TYPE_INT_ARGB
-            )
-            img.createGraphics().also {
-                it.drawImage(this.image, 0, 0, null)
+        private fun Image.toBuffered() = BufferedImage(
+            getWidth(null),
+            getHeight(null),
+            BufferedImage.TYPE_INT_ARGB
+        ).apply {
+            createGraphics().also {
+                it.drawImage(this@toBuffered, 0, 0, null)
                 it.dispose()
             }
-            ImageIO.write(img, "png", File(iconFilePath))
         }
+
+        fun Image.save(path: String) =
+            ImageIO.write(this.toBuffered(), "png", File(path))
+
+        fun Image.scaled(width: Int): Image = this.getScaledInstance(
+            width, width * getHeight(null) / getWidth(null),
+            Image.SCALE_SMOOTH
+        )
     }
 }

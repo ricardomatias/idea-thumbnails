@@ -68,9 +68,14 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Copy thumbnail- [ ] Enable plugin only if project is openrndr-template
 - [x] Fix enlarged image popup window not showing image
 - [x] Reduce margins in cells
+- [x] Use double click to open editor (instead of single click)
+- [x] Add filter box
 - [ ] Only enable plugin if it's an OPENRNDR project. How to detect?
+- [ ] Timer for filter: https://stackoverflow.com/q/31666428
+- [ ] Filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
 - [ ] Add filter-by-name
 - [ ] Add filter for with/missing/both thumbnail
 - [ ] Add filter-by-age
 - [ ] Detect file changes to reload
 - [ ] Resize JLabel not working when updating icon.
+- [ ] Drag & Drop no longer works. move code to main panel?
