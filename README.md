@@ -62,11 +62,15 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Ask in Slack how to detect item in list under mouse. Figured out!
 - [x] Copy image upon drag and drop
 - [x] Activate updating real .kt files with header (now using /tmp)
-- [ ] Enable plugin only if project is openrndr-template
-- [ ] Make it possible to click on image (enlarge) and name (open file to edit)
 - [x] For programs without hash show image placeholder. Clicking on it opens file to edit.
-- [ ] Decide how to save screenshot
+- [x] Make it possible to click on image (enlarge) and name (open file to edit)
+- [x] Paste thumbnail
+- [x] Copy thumbnail- [ ] Enable plugin only if project is openrndr-template
+- [x] Fix enlarged image popup window not showing image
+- [x] Reduce margins in cells
+- [ ] Only enable plugin if it's an OPENRNDR project. How to detect?
 - [ ] Add filter-by-name
 - [ ] Add filter for with/missing/both thumbnail
 - [ ] Add filter-by-age
 - [ ] Detect file changes to reload
+- [ ] Resize JLabel not working when updating icon.

@@ -1,1 +1,1 @@
-rootProject.name = "idea-thumbnails"
+rootProject.name = "OPENRNDR Thumbnails"

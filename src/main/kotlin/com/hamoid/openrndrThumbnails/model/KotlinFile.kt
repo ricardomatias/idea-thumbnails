@@ -6,8 +6,9 @@ import java.util.*
 /**
  * A model representing a Kotlin file.
  */
-data class KotlinFile(val path: File) {
-    fun relativePath(): String = path.relativeTo(root).path
+data class KotlinFile(val file: File) {
+    fun relativePath(): String = file.relativeTo(root).path
+    fun thumbPath(): String = "$rootThumbs/$id.png"
 
     private lateinit var content: String
 
@@ -25,11 +26,11 @@ data class KotlinFile(val path: File) {
          */    
         """.trimIndent()
 
-        val lines = path.readLines().toMutableList()
+        val lines = file.readLines().toMutableList()
         val i = 1 + lines.indexOfLast { it.startsWith("import ") }
         lines.add(i, header)
 
-        path.writeText(
+        file.writeText(
             lines.joinToString("\n", postfix = "\n")
         )
     }
@@ -65,7 +66,7 @@ data class KotlinFile(val path: File) {
     }
 
     fun reload() {
-        content = path.readText()
+        content = file.readText()
         parseHeader()
     }
 
@@ -86,6 +87,7 @@ data class KotlinFile(val path: File) {
 
     companion object {
         // Set before creating any KotlinFile instances!
+        lateinit var rootThumbs: File
         lateinit var root: File
 
         // rx to get inner content of /** ??? */

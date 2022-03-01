@@ -13,9 +13,6 @@ class IconUtils {
         fun createSmallIcon(iconFilePath: String) =
             createIcon(iconFilePath, 100)
 
-        fun createOriginalIcon(iconFilePath: String) =
-            createIcon(iconFilePath)
-
         fun createIcon(iconFilePath: String, width: Int = 0): ImageIcon {
             val file = File(iconFilePath)
 

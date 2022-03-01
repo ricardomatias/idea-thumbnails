@@ -1,111 +1,40 @@
 package com.hamoid.openrndrThumbnails.form
 
 import com.hamoid.openrndrThumbnails.model.KotlinFile
+import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.ui.components.JBScrollPane
-import java.awt.Dimension
-import javax.swing.Action
+import java.awt.BorderLayout
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
-import javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
-import javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
-import javax.swing.SpringLayout
 
-class OriginalImageDialog(project: Project, kotlinFile: KotlinFile) :
+class OriginalImageDialog(
+    project: Project,
+    private val kotlinFile: KotlinFile
+) :
     DialogWrapper(project, true) {
 
-    private var mainPanel: JPanel? = null
-    private val subPanel: JPanel = JPanel()
-    private var springLayout: SpringLayout? = null
-
     init {
-        springLayout = SpringLayout()
-        subPanel.layout = springLayout
-
-        isAutoAdjustable = false
-        setResizable(true)
-        setSize(480, 360)
-
+        isAutoAdjustable = true
         title = kotlinFile.relativePath()
-
-        createContent(kotlinFile)
+        setSize(640, 480)
         init()
     }
 
-    private fun createContent(model: KotlinFile) {
-        addDisplayImage(model)
-    }
+    override fun createCenterPanel(): JComponent {
+        val dialogPanel = JPanel(BorderLayout())
 
-    private fun addDisplayImage(model: KotlinFile) {
-        var oldPanel: JPanel? = null
-//        var panelWidth = HORIZONTAL_PADDING
-//        var panelHeight = 0
-//
-//        mainPanel?.add(createScrollPane(), BorderLayout.CENTER)
-//
-//        model.filePathList.forEach { filePath ->
-//
-//            val iconLabel = JLabel().apply {
-//                icon = IconUtils.createOriginalIcon(filePath)
-//                border = SoftBevelBorder(SoftBevelBorder.LOWERED)
-//            }
-//
-//            val panel = JPanel().apply {
-//                layout = BorderLayout()
-//                add(iconLabel, BorderLayout.CENTER)
-//            }
-//
-//            updateContainer(panel, oldPanel)
-//
-//            panelWidth += panel.width + HORIZONTAL_PADDING
-//            if (panelHeight < panel.height) {
-//                panelHeight = panel.height
-//            }
-//
-//            oldPanel = panel
-//        }
-//
-//        setContainerSize(panelWidth, panelHeight)
-    }
-
-    private fun createScrollPane() =
-        JBScrollPane(
-            VERTICAL_SCROLLBAR_AS_NEEDED,
-            HORIZONTAL_SCROLLBAR_AS_NEEDED
-        ).apply {
-            setViewportView(subPanel)
+        val icon = JLabel().apply {
+            icon = IconUtils.createIcon(kotlinFile.thumbPath())
+            iconTextGap = 0
         }
+        dialogPanel.add(icon, BorderLayout.CENTER)
 
-    private fun updateContainer(newPanel: JPanel, oldPanel: JPanel?) {
-        val layout =
-            if (oldPanel == null) SpringLayout.WEST else SpringLayout.EAST
-        val panel = oldPanel ?: subPanel
-        springLayout?.run {
-            putConstraint(
-                SpringLayout.NORTH, newPanel, VERTICAL_PADDING,
-                SpringLayout.NORTH, subPanel
-            )
-            putConstraint(
-                SpringLayout.WEST, newPanel, HORIZONTAL_PADDING,
-                layout, panel
-            )
-        }
-        subPanel.add(newPanel)
-        subPanel.doLayout()
+        return dialogPanel
     }
 
-    private fun setContainerSize(width: Int, height: Int) {
-        subPanel.preferredSize = Dimension(width, height + VERTICAL_PADDING * 2)
-    }
-
-    override fun createCenterPanel(): JComponent? = mainPanel
-
-    override fun createActions(): Array<Action> =
-        Array(1) { DialogWrapperExitAction("OK", OK_EXIT_CODE) }
-
-    companion object {
-        private const val VERTICAL_PADDING = 8
-        private const val HORIZONTAL_PADDING = 16
-    }
+    override fun createActions() = arrayOf(
+        DialogWrapperExitAction("OK", OK_EXIT_CODE)
+    )
 }
