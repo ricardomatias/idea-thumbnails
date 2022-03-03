@@ -99,7 +99,7 @@ class ThumbsPanel(private val project: Project) :
         panel.add(createScrollPane(), BorderLayout.CENTER)
 
         // 3. Debug text area
-        panel.add(debug, BorderLayout.SOUTH)
+        //panel.add(debug, BorderLayout.SOUTH)
 
         return panel
     }
@@ -273,12 +273,10 @@ class ThumbsPanel(private val project: Project) :
 
         label.icon = IconUtils.createSmallIcon(thumbPath)
         label.text = label.text + ""
-        label.preferredSize = null
-        panel.preferredSize = null
-        label.setSize(label.width, label.icon.iconHeight)
-        panel.setSize(label.width, label.icon.iconHeight)
-        label.invalidate()
-        panel.invalidate()
+
+        val model = panelList.model as DefaultListModel
+        model.addElement(JPanel())
+        model.remove(model.size() - 1)
     }
 
     /**
