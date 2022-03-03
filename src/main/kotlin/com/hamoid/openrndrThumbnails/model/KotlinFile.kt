@@ -1,10 +1,19 @@
 package com.hamoid.openrndrThumbnails.model
 
+import com.hamoid.openrndrThumbnails.utils.IconUtils
+import java.awt.FlowLayout
+import java.awt.Font
 import java.io.File
 import java.util.*
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.border.EmptyBorder
 
 /**
- * A model representing a Kotlin file.
+ * Represents a Kotlin file.
+ * Includes metadata ([id], [description], [tags]),
+ * the [content] of the file and a Swing [panel] component to display
+ * in a scrollable list.
  */
 data class KotlinFile(val file: File) {
     fun relativePath(): String = file.relativeTo(root).path
@@ -15,6 +24,61 @@ data class KotlinFile(val file: File) {
     lateinit var id: String
     lateinit var description: String
     lateinit var tags: String
+
+    val panel = JPanel().apply {
+        layout = FlowLayout().apply {
+            alignment = FlowLayout.LEFT
+        }
+        border = EmptyBorder(0, 0, 0, 0)
+    }
+
+    init {
+        reload()
+    }
+
+    fun reload() {
+        content = file.readText()
+
+        // find first block comment in the kt file
+        val blockComment = rxBlockComment.find(content)
+        if (blockComment != null) {
+            // trim the comment lines removing ' ' and '*' and
+            // join into one long line separated with spaces
+            val commentLines = blockComment.groupValues[1].split("\n")
+            val compactHeader = commentLines.joinToString(" ") {
+                it.trim('*', ' ')
+            }
+            // in that line, try find id,  description and tags
+            val props = rxProperties.find(compactHeader)
+            if (props != null) {
+                // if found, set vars and return
+                id = props.groupValues[1]
+                description = props.groupValues[2]
+                tags = props.groupValues[3]
+                createLabel()
+                return
+            }
+        }
+        // if not found, generate id, description and tags, save file
+        id = UUID.randomUUID().toString()
+        description = "New sketch"
+        tags = "#new"
+        saveWithNewHeader()
+        createLabel()
+    }
+
+    private fun createLabel() {
+        val text = relativePath()
+            .split("/")
+            .joinToString("<br>", "<html>", "</html>")
+
+        panel.removeAll()
+        panel.add(JLabel(text, JLabel.LEFT).apply {
+            icon = IconUtils.createSmallIcon(thumbPath())
+            font = Font(Font.SANS_SERIF, Font.PLAIN, 10)
+            iconTextGap = 10
+        })
+    }
 
     private fun saveWithNewHeader() {
         val header = """
@@ -35,54 +99,11 @@ data class KotlinFile(val file: File) {
         )
     }
 
-    /**
-     * Parses header ([id], [description], [tags]) from [content]
-     */
-    private fun parseHeader() {
-        // find first block comment in the kt file
-        val blockComment = rxBlockComment.find(content)
-        if (blockComment != null) {
-            // trim the comment lines removing ' ' and '*' and
-            // join into one long line separated with spaces
-            val commentLines = blockComment.groupValues[1].split("\n")
-            val compactHeader = commentLines.joinToString(" ") {
-                it.trim('*', ' ')
-            }
-            // in that line, try find id,  description and tags
-            val props = rxProperties.find(compactHeader)
-            if (props != null) {
-                // if found, set vars and return
-                id = props.groupValues[1]
-                description = props.groupValues[2]
-                tags = props.groupValues[3]
-                return
-            }
-        }
-        // if not found, generate id, description and tags, save file
-        id = UUID.randomUUID().toString()
-        description = "New sketch"
-        tags = "#new"
-        saveWithNewHeader()
-    }
-
-    fun reload() {
-        content = file.readText()
-        parseHeader()
-    }
-
-    init {
-        reload()
-    }
-
     @OptIn(ExperimentalStdlibApi::class)
     val tokens: String by lazy {
-        content.lowercase()
-            .split(Regex("\\W|\\d"))
-            .filter {
+        content.lowercase().split(Regex("\\W|\\d")).filter {
                 it.length > 2 && it !in ignoredTokens
-            }
-            .distinct()
-            .joinToString(" ")
+            }.distinct().joinToString(" ")
     }
 
     companion object {

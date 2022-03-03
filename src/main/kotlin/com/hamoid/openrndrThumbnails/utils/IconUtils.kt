@@ -18,6 +18,8 @@ class IconUtils {
             return ImageIcon(if (width > 0) img.scaled(width) else img)
         }
 
+        fun deleteIcon(path: String) = File(path).delete()
+
         fun loadImage(path: String): Image {
             val file = File(path)
 
@@ -33,7 +35,7 @@ class IconUtils {
 
         }
 
-        private fun emptyImage() = BufferedImage(
+        fun emptyImage() = BufferedImage(
             100, 16, BufferedImage.TYPE_INT_ARGB
         )
 

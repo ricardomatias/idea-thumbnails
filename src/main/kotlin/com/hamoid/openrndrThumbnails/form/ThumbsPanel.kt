@@ -6,12 +6,12 @@ import com.hamoid.openrndrThumbnails.TransferableImage
 import com.hamoid.openrndrThumbnails.action.OpenSettingsAction
 import com.hamoid.openrndrThumbnails.action.ReloadAction
 import com.hamoid.openrndrThumbnails.model.KotlinFile
+import com.hamoid.openrndrThumbnails.utils.DelayedChangeListener
 import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.hamoid.openrndrThumbnails.utils.IconUtils.Companion.save
 import com.hamoid.openrndrThumbnails.utils.IconUtils.Companion.scaled
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
@@ -20,8 +20,8 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
 import java.awt.BorderLayout
+import java.awt.EventQueue
 import java.awt.FlowLayout
-import java.awt.Font
 import java.awt.Image
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.DataFlavor.imageFlavor
@@ -30,7 +30,7 @@ import java.awt.event.*
 import java.awt.event.MouseEvent.BUTTON3
 import java.io.File
 import javax.swing.*
-import javax.swing.border.EmptyBorder
+
 
 /**
  * Main Panel
@@ -40,22 +40,25 @@ class ThumbsPanel(private val project: Project) :
     ActionListener {
 
     private val thumbsRootPath = File("${project.basePath}/.thumbnails")
-    private val kotlinFileList = mutableListOf<KotlinFile>()
+    private val allKotlinFiles = mutableListOf<KotlinFile>()
+    private val filteredKotlinFiles = mutableListOf<KotlinFile>()
     private var panelList = JBList(emptyList<JPanel>())
     private var clickedItemId = -1
-    private var clickTimestamp = -1L
+    private var lastClickMs = -1L
 
-    private val log = logger<ThumbsPanel>()
+    private val debug = JTextArea(4, 20)
 
     init {
         KotlinFile.root = File(project.basePath + Constants.DEFAULT_SOURCE_PATH)
         KotlinFile.rootThumbs = thumbsRootPath
 
-        log.warn("hello")
+        log("hello")
         thumbsRootPath.mkdirs()
         toolbar = createToolbar()
         setContent(createContent())
     }
+
+    private fun log(msg: String) = debug.append("$msg\n")
 
     /**
      * Create main tool bar with the settings wrench icon
@@ -71,7 +74,7 @@ class ThumbsPanel(private val project: Project) :
 
     private fun reload() {
         // TODO: rebuild panel (empty it, populate it)
-        println("reload")
+        log("reload")
     }
 
     /**
@@ -80,67 +83,70 @@ class ThumbsPanel(private val project: Project) :
     private fun createContent(): JComponent {
         //val pluginConfig = PluginConfig.getInstance(project)
 
-        kotlinFileList.addAll(scanFiles(KotlinFile.root).map {
-            KotlinFile(it)
-        })
-
-        val textField = JTextField(20).apply {
-            addCaretListener {
-                println(it)
-            }
-        }
         val panel = JPanel()
         panel.layout = BorderLayout()
-        panel.add(textField, BorderLayout.NORTH)
-        panel.add(
-            createScrollPane(filesToJPanels(kotlinFileList)),
-            BorderLayout.CENTER
-        )
+
+        // 1. Top filter text input
+        val filterTextField = JTextField(20)
+        filterTextField.document.addDocumentListener(DelayedChangeListener().apply {
+            addChangeListener {
+                filter(filterTextField.text)
+            }
+        })
+        panel.add(filterTextField, BorderLayout.NORTH)
+
+        // 2. Scrollable thumbnail list
+        panel.add(createScrollPane(), BorderLayout.CENTER)
+
+        // 3. Debug text area
+        panel.add(debug, BorderLayout.SOUTH)
+
         return panel
     }
 
     /**
      * Scans folder for Kotlin files
      */
-    private fun scanFiles(targetDir: File): List<File> {
-        if (!targetDir.exists()) {
-            return listOf()
+    private fun populateKotlinFileList() {
+        allKotlinFiles.clear()
+        if (!KotlinFile.root.exists()) {
+            return
         }
-        return targetDir.walkTopDown().toList().filter {
+        KotlinFile.root.walkTopDown().toList().filter {
             it.name.endsWith(Constants.KT_SUFFIX)
-        }.sorted()
+        }.sorted().forEach {
+            allKotlinFiles.add(KotlinFile(it))
+        }
+        filteredKotlinFiles.clear()
+        filteredKotlinFiles.addAll(allKotlinFiles)
     }
 
-    /**
-     * Converts list of [KotlinFile] to UI panels
-     */
-    private fun filesToJPanels(kotlinFiles: List<KotlinFile>) =
-        kotlinFiles.map { kotlinFile ->
-            val panel = JPanel().apply {
-                layout = FlowLayout().apply {
-                    alignment = FlowLayout.LEFT
-                }
-                border = EmptyBorder(0, 0, 0, 0)
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun filter(str: String) {
+        val keyword = str.lowercase()
+        filteredKotlinFiles.clear()
+        filteredKotlinFiles.addAll(
+            allKotlinFiles.filter {
+                it.relativePath().lowercase().contains(keyword)
             }
-            val text = kotlinFile.relativePath()
-                .split("/")
-                .joinToString("<br>", "<html>", "</html>")
+        )
 
-            panel.add(JLabel(text, JLabel.LEFT).apply {
-                icon = IconUtils.createSmallIcon(kotlinFile.thumbPath())
-                font = Font(Font.SANS_SERIF, Font.PLAIN, 10)
-                iconTextGap = 10
-            })
-            panel
+        val model = panelList.model as DefaultListModel
+        model.removeAllElements()
+        filteredKotlinFiles.forEach {
+            model.addElement(it.panel)
         }
-
+        panelList.model = model
+    }
 
     /**
      * Creates a scroll pane with all the panels, add event listeners
      */
     @OptIn(ExperimentalStdlibApi::class)
-    private fun createScrollPane(items: List<JPanel>): JScrollPane {
-        panelList = JBList(items)
+    private fun createScrollPane(): JScrollPane {
+        populateKotlinFileList()
+        panelList = JBList(filteredKotlinFiles.map { it.panel })
         panelList.apply {
             selectionMode = ListSelectionModel.SINGLE_SELECTION
             layoutOrientation = JList.VERTICAL
@@ -165,19 +171,24 @@ class ThumbsPanel(private val project: Project) :
                         return
                     }
 
-                    // there's no way to distinguish icon-click vs text-click
-                    // https://stackoverflow.com/q/13777411
-                    // so I use the local `x` position to distinguish both cases
                     val panel = panelList.model.getElementAt(clickedItemId)
                     val label = panel.getComponent(0) as JLabel
-                    if (e.x > label.icon.iconWidth + label.iconTextGap) {
-                        if(System.currentTimeMillis() - clickTimestamp < 300) {
+                    // there's no way to distinguish icon-click vs text-click
+                    // https://stackoverflow.com/q/13777411
+                    // so I use the `x` position to distinguish between them
+                    val textClicked =
+                        e.x > label.icon.iconWidth + label.iconTextGap / 2
+                    val currentClickMs = System.currentTimeMillis()
+
+                    if (textClicked) {
+                        val doubleClick = currentClickMs - lastClickMs < 300
+                        if (doubleClick) {
                             edit(clickedItemId)
                         }
                     } else {
                         showOriginalImage(clickedItemId)
                     }
-                    clickTimestamp = System.currentTimeMillis()
+                    lastClickMs = currentClickMs
                 }
             })
 
@@ -200,6 +211,9 @@ class ThumbsPanel(private val project: Project) :
                     if (e == null) return
                     if (e.keyCode == KeyEvent.VK_ENTER) {
                         showOriginalImage(panelList.minSelectionIndex)
+                    }
+                    if (e.keyCode == KeyEvent.VK_DELETE) {
+                        deleteThumb(clickedItemId)
                     }
                 }
             })
@@ -225,16 +239,16 @@ class ThumbsPanel(private val project: Project) :
                         DataFlavor.javaFileListFlavor
                     ) as List<*>? ?: listOf("")
 
-                    log.info("Dropped")
+                    log("Dropped")
                     val droppedFile = droppedFiles.first()
                     if (droppedFile is File && droppedFile.name.endsWith(
                             Constants.PNG_SUFFIX
                         )
                     ) {
-                        log.info("It's a PNG!")
+                        log("It's a PNG!")
                         val i = panelList.locationToIndex(ev.location)
                         if (i >= 0) {
-                            log.info("index is $i")
+                            log("index is $i")
                             val icon =
                                 IconUtils.loadImage(droppedFile.absolutePath)
                             setLabelIcon(i, icon)
@@ -247,7 +261,7 @@ class ThumbsPanel(private val project: Project) :
     }
 
     private fun setLabelIcon(i: Int, img: Image) {
-        val thumbPath = kotlinFileList[i].thumbPath()
+        val thumbPath = filteredKotlinFiles[i].thumbPath()
         val panel = panelList.model.getElementAt(i)
         val label = panel.getComponent(0) as JLabel
 
@@ -258,8 +272,13 @@ class ThumbsPanel(private val project: Project) :
         }
 
         label.icon = IconUtils.createSmallIcon(thumbPath)
+        label.text = label.text + ""
+        label.preferredSize = null
+        panel.preferredSize = null
         label.setSize(label.width, label.icon.iconHeight)
-        label.revalidate()
+        panel.setSize(label.width, label.icon.iconHeight)
+        label.invalidate()
+        panel.invalidate()
     }
 
     /**
@@ -267,7 +286,7 @@ class ThumbsPanel(private val project: Project) :
      */
     private fun edit(fileIndex: Int) {
         LocalFileSystem.getInstance().findFileByIoFile(
-            kotlinFileList[fileIndex].file
+            filteredKotlinFiles[fileIndex].file
         )?.let {
             FileEditorManager.getInstance(project)
                 .openFile(it, true)
@@ -304,33 +323,42 @@ class ThumbsPanel(private val project: Project) :
      * Show enlarged image
      */
     private fun showOriginalImage(it: Int) =
-        OriginalImageDialog(project, kotlinFileList[it]).show()
+        OriginalImageDialog(project, filteredKotlinFiles[it]).show()
 
+    /**
+     * Delete thumbnail
+     */
+    private fun deleteThumb(id: Int) {
+        if (clickedItemId >= 0) {
+            val f = filteredKotlinFiles[id]
+            if (IconUtils.deleteIcon(f.thumbPath())) {
+                setLabelIcon(clickedItemId, IconUtils.emptyImage())
+            }
+        }
+    }
 
     /**
      * Copy image thumbnail to clipboard
      */
     private fun copyThumbnail() {
-        if (clickedItemId < 0) {
-            return
+        if (clickedItemId >= 0) {
+            val thumbPath = filteredKotlinFiles[clickedItemId].thumbPath()
+            val icon = IconUtils.createIcon(thumbPath)
+            val img = TransferableImage(icon.image)
+            CopyPasteManager.getInstance().setContents(img)
         }
-        val thumbPath = kotlinFileList[clickedItemId].thumbPath()
-        val icon = IconUtils.createIcon(thumbPath)
-        val img = TransferableImage(icon.image)
-        CopyPasteManager.getInstance().setContents(img)
     }
 
     /**
      * Paste clipboard image to thumbnail
      */
     private fun pasteThumbnail() {
-        if (clickedItemId < 0) {
-            return
-        }
-        val content = CopyPasteManager.getInstance().contents
-        if (content != null && content.isDataFlavorSupported(imageFlavor)) {
-            val img = content.getTransferData(imageFlavor) as Image
-            setLabelIcon(clickedItemId, img)
+        if (clickedItemId >= 0) {
+            val content = CopyPasteManager.getInstance().contents
+            if (content != null && content.isDataFlavorSupported(imageFlavor)) {
+                val img = content.getTransferData(imageFlavor) as Image
+                setLabelIcon(clickedItemId, img)
+            }
         }
     }
 }

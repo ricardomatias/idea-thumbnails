@@ -70,12 +70,12 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Reduce margins in cells
 - [x] Use double click to open editor (instead of single click)
 - [x] Add filter box
+- [x] Timer for filter: https://stackoverflow.com/q/31666428
+- [x] Filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
+- [x] Add filter-by-name
+- [x] Fix Drag & Drop no longer works. move code to main panel?
+- [ ] Resize JLabel not working when updating icon.
+- [ ] Detect files added, moved, deleted and update list.
 - [ ] Only enable plugin if it's an OPENRNDR project. How to detect?
-- [ ] Timer for filter: https://stackoverflow.com/q/31666428
-- [ ] Filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
-- [ ] Add filter-by-name
 - [ ] Add filter for with/missing/both thumbnail
 - [ ] Add filter-by-age
-- [ ] Detect file changes to reload
-- [ ] Resize JLabel not working when updating icon.
-- [ ] Drag & Drop no longer works. move code to main panel?
