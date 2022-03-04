@@ -1,5 +1,6 @@
 package com.hamoid.openrndrThumbnails.model
 
+import com.hamoid.openrndrThumbnails.MyBundle
 import com.hamoid.openrndrThumbnails.form.KotlinFilePanel
 import java.io.File
 import java.util.*
@@ -23,6 +24,9 @@ data class KotlinFile(val file: File) {
     lateinit var id: String
     lateinit var description: String
     lateinit var tags: String
+
+    // A string combining metadata and tokens to be searched on
+    lateinit var searchable: String
 
     /**
      * Contains the UI component to display in a list.
@@ -51,22 +55,35 @@ data class KotlinFile(val file: File) {
             val compactHeader = commentLines.joinToString(" ") {
                 it.trim('*', ' ')
             }
-            // in that line, try find id,  description and tags
-            val props = rxProperties.find(compactHeader)
+            // in that line, try find metadata
+            val props = rxMetadata.find(compactHeader)
             if (props != null) {
-                // if found, set vars and return
-                id = props.groupValues[1]
-                description = props.groupValues[2]
-                tags = props.groupValues[3]
-                panel.rebuild()
+                // if found, set metadata and return
+                updateMetadata(props.groupValues.drop(1))
                 return
             }
         }
-        // if not found, generate id, description and tags, save file
-        id = UUID.randomUUID().toString()
-        description = "New sketch"
-        tags = "#new"
+        // if not found, generate metadata and save .kt file
+        updateMetadata(
+            listOf(UUID.randomUUID().toString(), "New sketch", "#new")
+        )
         saveWithNewHeader()
+    }
+
+    /**
+     * Update [id], [description], [tags], [searchable] and then rebuild the [panel]
+     */
+    private fun updateMetadata(metadata: List<String>) {
+        id = metadata[0]
+        description = metadata[1]
+        tags = metadata[2]
+
+        val tokens = fileContent.toLowerCase().split(Regex("\\W|\\d")).filter {
+            it.length > 2 && it !in ignoredTokens
+        }.distinct().joinToString(" ")
+
+        searchable = "${relativePath.toLowerCase()} $tags $tokens $description"
+
         panel.rebuild()
     }
 
@@ -92,17 +109,6 @@ data class KotlinFile(val file: File) {
         )
     }
 
-    /**
-     * Creates a list of unique tokens out of the source code of the
-     * Kotlin file. Ignores commonly used tokens like `var` and `val`.
-     */
-    @OptIn(ExperimentalStdlibApi::class)
-    val tokens: String by lazy {
-        fileContent.lowercase().split(Regex("\\W|\\d")).filter {
-            it.length > 2 && it !in ignoredTokens
-        }.distinct().joinToString(" ")
-    }
-
     companion object {
         // Set before creating any KotlinFile instances!
         lateinit var rootThumbs: File
@@ -114,17 +120,14 @@ data class KotlinFile(val file: File) {
             setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
         )
 
-        // rx to extract id, description and tags from String.
-        val rxProperties = Regex(
+        // rx to extract metadata from String.
+        val rxMetadata = Regex(
             """id:\h*(\S+)\h+description:\h*(.*?)\h+tags:\h*(\V*?)$"""
         )
 
         // Tokens that are too frequent in my OPENRNDR programs to care about.
         // In other words, searching for these would return all programs.
-        val ignoredTokens = listOf(
-            "application", "configure", "extend", "fun", "funpro",
-            "height", "import", "main", "openrndr", "org",
-            "package", "program", "val", "var", "width",
-        )
+        val ignoredTokens = MyBundle.message("ignoreTokens")
+            .split(" ").filterNot { it.isEmpty() }
     }
 }

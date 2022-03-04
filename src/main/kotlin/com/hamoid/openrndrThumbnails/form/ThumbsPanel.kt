@@ -48,13 +48,13 @@ class ThumbsPanel(private val project: Project) :
         KotlinFile.root = File(project.basePath + Constants.DEFAULT_SOURCE_PATH)
         KotlinFile.rootThumbs = thumbsRootPath
 
-        log("hello")
+        // log("hello")
         thumbsRootPath.mkdirs()
         toolbar = createToolbar()
         setContent(createContent())
     }
 
-    private fun log(msg: String) = debug.append("$msg\n")
+    // private fun log(msg: String) = debug.append("$msg\n")
 
     /**
      * Create main tool bar with the settings wrench icon
@@ -97,7 +97,7 @@ class ThumbsPanel(private val project: Project) :
         panel.add(createScrollPane(), BorderLayout.CENTER)
 
         // 3. Debug text area
-        panel.add(debug, BorderLayout.SOUTH)
+        //panel.add(debug, BorderLayout.SOUTH)
 
         return panel
     }
@@ -124,13 +124,12 @@ class ThumbsPanel(private val project: Project) :
      * Creates a filtered copy of [allKotlinFiles].
      * Could also be used for sorting.
      */
-    @OptIn(ExperimentalStdlibApi::class)
     private fun filter(str: String) {
-        val keyword = str.lowercase()
+        val keyword = str.toLowerCase()
         filteredKotlinFiles.clear()
         filteredKotlinFiles.addAll(
             allKotlinFiles.filter {
-                it.relativePath.lowercase().contains(keyword)
+                it.searchable.contains(keyword)
             }
         )
 
@@ -322,7 +321,7 @@ class ThumbsPanel(private val project: Project) :
      * Copy image thumbnail to clipboard
      */
     private fun copyThumbnail() {
-        if(selectedKotlinFile != null) {
+        if (selectedKotlinFile != null) {
             CopyPasteManager.getInstance().setContents(
                 TransferableImage(
                     selectedKotlinFile!!.panel.largeThumb

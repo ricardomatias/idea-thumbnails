@@ -76,10 +76,11 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Fix Drag & Drop no longer works. move code to main panel?
 - [x] Fix Resize JLabel not working when updating icon.
 - [x] Move all mentions of icon from ThumbsPanel to KotlinFile
-- [ ] Filter by tokens, tags
-- [ ] Show tags, description
+- [x] Filter by tokens, tags
 - [x] Fix: Delete does not update
 - [x] Fix: Drag & drop does not update
+- [x] Show tags, description
+- [x] Show date (from git)
 
 - [ ] Detect files added, moved, deleted and update list.
 - [ ] Only enable plugin if it's an OPENRNDR project. How to detect?
