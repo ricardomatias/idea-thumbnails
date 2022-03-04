@@ -5,13 +5,17 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
+import javax.swing.Icon
 import javax.swing.ImageIcon
 
 
 class IconUtils {
     companion object {
+        private const val defaultWidth = 100
+        private const val defaultHeight = 16
+
         fun createSmallIcon(path: String) =
-            createIcon(path, 100)
+            createIcon(path, defaultWidth)
 
         fun createIcon(path: String, width: Int = 0): ImageIcon {
             val img = loadImage(path)
@@ -36,7 +40,7 @@ class IconUtils {
         }
 
         fun emptyImage() = BufferedImage(
-            100, 16, BufferedImage.TYPE_INT_ARGB
+            defaultWidth, defaultHeight, BufferedImage.TYPE_INT_ARGB
         )
 
         private fun Image.toBuffered() = BufferedImage(
@@ -57,5 +61,7 @@ class IconUtils {
             width, width * getHeight(null) / getWidth(null),
             Image.SCALE_SMOOTH
         )
+
+        fun isEmpty(icon: Icon) = icon.iconHeight == defaultHeight
     }
 }

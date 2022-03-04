@@ -1,46 +1,49 @@
 package com.hamoid.openrndrThumbnails.model
 
-import com.hamoid.openrndrThumbnails.utils.IconUtils
-import java.awt.FlowLayout
-import java.awt.Font
+import com.hamoid.openrndrThumbnails.form.KotlinFilePanel
 import java.io.File
 import java.util.*
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.border.EmptyBorder
 
 /**
  * Represents a Kotlin file.
  * Includes metadata ([id], [description], [tags]),
- * the [content] of the file and a Swing [panel] component to display
+ * the [fileContent] of the file and a Swing [panel] component to display
  * in a scrollable list.
  */
 data class KotlinFile(val file: File) {
-    fun relativePath(): String = file.relativeTo(root).path
-    fun thumbPath(): String = "$rootThumbs/$id.png"
+    val relativePath: String
+        get() = file.relativeTo(root).path
 
-    private lateinit var content: String
+    val thumbPath: String
+        get() = "$rootThumbs/$id.png"
 
+    private lateinit var fileContent: String
+
+    // metadata from the file
     lateinit var id: String
     lateinit var description: String
     lateinit var tags: String
 
-    val panel = JPanel().apply {
-        layout = FlowLayout().apply {
-            alignment = FlowLayout.LEFT
-        }
-        border = EmptyBorder(0, 0, 0, 0)
-    }
+    /**
+     * Contains the UI component to display in a list.
+     */
+    val panel = KotlinFilePanel(this)
 
     init {
         reload()
     }
 
+    /**
+     * Reads the Kotlin [file] content from disk,
+     * extracting [id], [description] and [tags] from the header.
+     * If the header is not found it generates a random [id] and s
+     * aves the file to disk.
+     */
     fun reload() {
-        content = file.readText()
+        fileContent = file.readText()
 
         // find first block comment in the kt file
-        val blockComment = rxBlockComment.find(content)
+        val blockComment = rxBlockComment.find(fileContent)
         if (blockComment != null) {
             // trim the comment lines removing ' ' and '*' and
             // join into one long line separated with spaces
@@ -55,7 +58,7 @@ data class KotlinFile(val file: File) {
                 id = props.groupValues[1]
                 description = props.groupValues[2]
                 tags = props.groupValues[3]
-                createLabel()
+                panel.rebuild()
                 return
             }
         }
@@ -64,22 +67,12 @@ data class KotlinFile(val file: File) {
         description = "New sketch"
         tags = "#new"
         saveWithNewHeader()
-        createLabel()
+        panel.rebuild()
     }
 
-    private fun createLabel() {
-        val text = relativePath()
-            .split("/")
-            .joinToString("<br>", "<html>", "</html>")
-
-        panel.removeAll()
-        panel.add(JLabel(text, JLabel.LEFT).apply {
-            icon = IconUtils.createSmallIcon(thumbPath())
-            font = Font(Font.SANS_SERIF, Font.PLAIN, 10)
-            iconTextGap = 10
-        })
-    }
-
+    /**
+     * Saves the Kotlin file to disk with the injected header.
+     */
     private fun saveWithNewHeader() {
         val header = """
             
@@ -99,11 +92,15 @@ data class KotlinFile(val file: File) {
         )
     }
 
+    /**
+     * Creates a list of unique tokens out of the source code of the
+     * Kotlin file. Ignores commonly used tokens like `var` and `val`.
+     */
     @OptIn(ExperimentalStdlibApi::class)
     val tokens: String by lazy {
-        content.lowercase().split(Regex("\\W|\\d")).filter {
-                it.length > 2 && it !in ignoredTokens
-            }.distinct().joinToString(" ")
+        fileContent.lowercase().split(Regex("\\W|\\d")).filter {
+            it.length > 2 && it !in ignoredTokens
+        }.distinct().joinToString(" ")
     }
 
     companion object {
@@ -113,7 +110,7 @@ data class KotlinFile(val file: File) {
 
         // rx to get inner content of /** ??? */
         val rxBlockComment = Regex(
-            """\/\*\*(.*?)\*\/""",
+            """/\*\*(.*?)\*/""",
             setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
         )
 

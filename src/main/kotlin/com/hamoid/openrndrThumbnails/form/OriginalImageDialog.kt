@@ -17,7 +17,7 @@ class OriginalImageDialog(
 
     init {
         isAutoAdjustable = true
-        title = kotlinFile.relativePath()
+        title = kotlinFile.relativePath
         setSize(640, 480)
         init()
     }
@@ -26,7 +26,7 @@ class OriginalImageDialog(
         val dialogPanel = JPanel(BorderLayout())
 
         val icon = JLabel().apply {
-            icon = IconUtils.createIcon(kotlinFile.thumbPath())
+            icon = IconUtils.createIcon(kotlinFile.thumbPath)
             iconTextGap = 0
         }
         dialogPanel.add(icon, BorderLayout.CENTER)

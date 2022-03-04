@@ -74,7 +74,13 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 - [x] Filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
 - [x] Add filter-by-name
 - [x] Fix Drag & Drop no longer works. move code to main panel?
-- [ ] Resize JLabel not working when updating icon.
+- [x] Fix Resize JLabel not working when updating icon.
+- [x] Move all mentions of icon from ThumbsPanel to KotlinFile
+- [ ] Filter by tokens, tags
+- [ ] Show tags, description
+- [x] Fix: Delete does not update
+- [x] Fix: Drag & drop does not update
+
 - [ ] Detect files added, moved, deleted and update list.
 - [ ] Only enable plugin if it's an OPENRNDR project. How to detect?
 - [ ] Add filter for with/missing/both thumbnail
