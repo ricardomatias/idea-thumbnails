@@ -135,6 +135,7 @@ class ThumbsPanel(private val project: Project) :
 
         val model = panelList.model as DefaultListModel
         model.removeAllElements()
+        System.gc()
         filteredKotlinFiles.forEach {
             model.addElement(it.panel)
         }

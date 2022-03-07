@@ -90,6 +90,10 @@ tasks {
         })
     }
 
+    runIde {
+        maxHeapSize = "2G"
+    }
+
     // Configure UI tests plugin
     // Read more: https://github.com/JetBrains/intellij-ui-test-robot
     runIdeForUiTests {

@@ -9,7 +9,7 @@ import javax.swing.Icon
 import javax.swing.ImageIcon
 
 
-class IconUtils {
+class Thumb {
     companion object {
         private const val defaultWidth = 100
         private const val defaultHeight = 16
