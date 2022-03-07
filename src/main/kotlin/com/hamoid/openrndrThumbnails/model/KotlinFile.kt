@@ -21,20 +21,18 @@ data class KotlinFile(val file: File) {
     private lateinit var fileContent: String
 
     // metadata from the file
-    lateinit var id: String
+    private lateinit var id: String
     lateinit var description: String
     lateinit var tags: String
 
     // A string combining metadata and tokens to be searched on
     lateinit var searchable: String
 
-    /**
-     * Contains the UI component to display in a list.
-     */
-    val panel = KotlinFilePanel(this)
+    // The UI component to display in a list
+    lateinit var panel: KotlinFilePanel
 
     init {
-        reload()
+        setup()
     }
 
     /**
@@ -43,7 +41,7 @@ data class KotlinFile(val file: File) {
      * If the header is not found it generates a random [id] and s
      * aves the file to disk.
      */
-    fun reload() {
+    fun setup() {
         fileContent = file.readText()
 
         // find first block comment in the kt file
@@ -84,7 +82,7 @@ data class KotlinFile(val file: File) {
 
         searchable = "${relativePath.toLowerCase()} $tags $tokens $description"
 
-        panel.rebuild()
+        panel = KotlinFilePanel(this)
     }
 
     /**

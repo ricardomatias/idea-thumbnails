@@ -1,7 +1,6 @@
 package com.hamoid.openrndrThumbnails.form
 
 import com.hamoid.openrndrThumbnails.model.KotlinFile
-import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import java.awt.BorderLayout
@@ -26,8 +25,8 @@ class OriginalImageDialog(
     override fun createCenterPanel(): JComponent {
         val panel = JPanel(BorderLayout())
 
-        val icon = JLabel().apply {
-            icon = IconUtils.createIcon(kotlinFile.thumbPath)
+        val img = JLabel().apply {
+            icon = kotlinFile.panel.getThumbLarge()
             iconTextGap = 0
         }
 
@@ -43,7 +42,7 @@ class OriginalImageDialog(
             ).inputStream
         ).readText()
 
-        panel.add(icon, BorderLayout.CENTER)
+        panel.add(img, BorderLayout.CENTER)
         panel.add(
             JLabel(
                 "<html>${kotlinFile.description}<br>$date<br>${kotlinFile.tags}</html>"

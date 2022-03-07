@@ -24,19 +24,36 @@
 - [x] Make it possible to click on image (enlarge) and name (open file to edit)
 - [x] Paste thumbnail
 - [x] Copy thumbnail- [ ] Enable plugin only if project is openrndr-template
-- [x] Fix enlarged image popup window not showing image
-- [x] Reduce margins in cells
 - [x] Use double click to open editor (instead of single click)
 - [x] Add filter box
-- [x] Timer for filter: https://stackoverflow.com/q/31666428
-- [x] Filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
+- [x] ADd timer for filter: https://stackoverflow.com/q/31666428
+- [x] Add filter: https://www.logicbig.com/tutorials/java-swing/list-filter.html
 - [x] Add filter-by-name
-- [x] Fix Drag & Drop no longer works. move code to main panel?
-- [x] Fix Resize JLabel not working when updating icon.
-- [x] Move all mentions of icon from ThumbsPanel to KotlinFile
-- [x] Filter by tokens, tags
-- [x] Fix: Delete does not update
-- [x] Fix: Drag & drop does not update
-- [x] Show tags, description
-- [x] Show date (from git)
+- [x] Add filter by tokens, tags
 
+### Changed
+- Reduce margins in cells
+- Move all mentions of icon from ThumbsPanel to KotlinFile
+- Show tags, description
+- Show date (from git)
+
+### Fixed
+- Enlarged image popup window not showing image
+- Drag & Drop no longer works. move code to main panel?
+- Resize JLabel not working when updating icon.
+- Delete does not update
+- Drag & drop does not update
+
+## [0.0.4]
+### Changed
+- Clean up
+
+## [0.0.5]
+### Added
+- Call gc after removing all elements
+
+### Changed
+- Increase heap size to 2G in dev mode
+- Implement Thumb class, remove code dealing with images from other classes
+- Accept JPG drops
+- Cache small thumbs to avoid recreating them on start (very inefficient)

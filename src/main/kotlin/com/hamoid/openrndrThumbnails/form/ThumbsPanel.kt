@@ -7,7 +7,6 @@ import com.hamoid.openrndrThumbnails.action.OpenSettingsAction
 import com.hamoid.openrndrThumbnails.action.ReloadAction
 import com.hamoid.openrndrThumbnails.model.KotlinFile
 import com.hamoid.openrndrThumbnails.utils.DelayedChangeListener
-import com.hamoid.openrndrThumbnails.utils.IconUtils
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -72,7 +71,7 @@ class ThumbsPanel(private val project: Project) :
      * Reload files from disk, parsing metadata
      */
     private fun reload() {
-        allKotlinFiles.forEach { it.reload() }
+        allKotlinFiles.forEach { it.setup() }
     }
 
     /**
@@ -111,7 +110,13 @@ class ThumbsPanel(private val project: Project) :
             return
         }
         KotlinFile.root.walkTopDown().toList().filter {
-            it.name.endsWith(Constants.KT_SUFFIX)
+            if (it.name.endsWith(Constants.KT_SUFFIX)) {
+                val t = it.readText()
+                return@filter t.contains("openrndr") &&
+                        t.contains("application")
+            } else {
+                return@filter false
+            }
         }.sorted().forEach {
             allKotlinFiles.add(KotlinFile(it))
         }
@@ -181,7 +186,7 @@ class ThumbsPanel(private val project: Project) :
                     val doubleClick = currentClickMs - lastClickMs < 400
 
                     if (doubleClick) {
-                        if (textClicked || selectedKotlinFile!!.panel.isEmptyIcon()) {
+                        if (textClicked || selectedKotlinFile!!.panel.hasNoThumb()) {
                             editCode()
                         } else {
                             showOriginalImage()
@@ -212,14 +217,16 @@ class ThumbsPanel(private val project: Project) :
                         showOriginalImage()
                     }
                     if (e.keyCode == KeyEvent.VK_DELETE) {
-                        deleteThumb()
+                        selectedKotlinFile?.panel?.clearThumb()
+                        refresh()
                     }
                 }
             })
 
             addListSelectionListener {
-                selectedKotlinFile =
-                    filteredKotlinFiles[panelList.minSelectionIndex]
+                selectedKotlinFile = filteredKotlinFiles[
+                        panelList.minSelectionIndex.coerceAtLeast(0)
+                ]
             }
 
             // Used to drop images into the list, then assign that image
@@ -237,15 +244,15 @@ class ThumbsPanel(private val project: Project) :
                         DataFlavor.javaFileListFlavor
                     ) as List<*>? ?: listOf("")
 
-                    val droppedFile = droppedFiles.first()
-                    if (droppedFile is File && droppedFile.name.endsWith(
-                            Constants.PNG_SUFFIX
-                        )
+                    val f = droppedFiles.first()
+                    if (f is File && (f.name.endsWith(Constants.PNG_SUFFIX) ||
+                                f.name.endsWith(Constants.JPEG_SUFFIX))
                     ) {
                         val i = panelList.locationToIndex(ev.location)
                         if (i >= 0) {
-                            filteredKotlinFiles[i].panel.largeThumb =
-                                IconUtils.loadImage(droppedFile.absolutePath)
+                            filteredKotlinFiles[i].panel.setThumb(
+                                f.absolutePath
+                            )
                             refresh()
                         }
                     }
@@ -311,21 +318,13 @@ class ThumbsPanel(private val project: Project) :
         OriginalImageDialog(project, selectedKotlinFile!!).show()
 
     /**
-     * Delete thumbnail
-     */
-    private fun deleteThumb() {
-        selectedKotlinFile?.panel?.clear()
-        refresh()
-    }
-
-    /**
      * Copy image thumbnail to clipboard
      */
     private fun copyThumbnail() {
         if (selectedKotlinFile != null) {
             CopyPasteManager.getInstance().setContents(
                 TransferableImage(
-                    selectedKotlinFile!!.panel.largeThumb
+                    selectedKotlinFile!!.panel.getThumbLarge().image
                 )
             )
         }
@@ -337,8 +336,9 @@ class ThumbsPanel(private val project: Project) :
     private fun pasteThumbnail() {
         val content = CopyPasteManager.getInstance().contents
         if (content != null && content.isDataFlavorSupported(imageFlavor)) {
-            selectedKotlinFile?.panel?.largeThumb =
+            selectedKotlinFile?.panel?.setThumb(
                 content.getTransferData(imageFlavor) as Image
+            )
             refresh()
         }
     }
